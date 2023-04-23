@@ -173,6 +173,7 @@ void Connection::waitTurn(Game& game) {
 		});
 	}
 	game.board = parseBoard(boardStr, !player);
+	game.cards = new CardsInfo(parseCards(cards, player));
 }
 
 std::string indexToPos(U32 i, bool flipped) {

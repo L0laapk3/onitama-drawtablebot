@@ -12,7 +12,7 @@
 template <bool player>
 bool inline Board::isTempleKingInRange() const{
 	// player king can move to temple
-	// return reverseMoveBoard[TEMPLE[player]] & k[player];
+	// return TODO reverseMoveBoard[TEMPLE[player]] & k[player];
 	return false;
 }
 
@@ -32,7 +32,7 @@ bool inline Board::isTempleWinInOne() const {
 
 U32 inline Board::isKingAttackedBy(U32 bbk, U32 bbp) {
 	U32 pk = _tzcnt_u32(bbk);
-	// return reverseMoveBoard[pk] & bbp;
+	// TODO return reverseMoveBoard[pk] & bbp;
 	return false;
 }
 
@@ -61,6 +61,7 @@ bool inline Board::isWinInOne() const {
 
 template <bool player>
 void inline Board::doWinInOne() {
+	// TODO: figure out card
 	if (isTempleWinInOne<player>()) {
 		p[player] ^= k[player];
 		k[player] = 1 << TEMPLE[player];

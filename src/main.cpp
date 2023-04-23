@@ -32,12 +32,12 @@ int main(int argc, char** argv) {
 	Game game(conn);
 
 	while (true) {
-		game.board.invert().print();
+		game.board.print();
 		if (game.myTurn) {
 			// auto bestMove = game.searchTime(game.board, 10000, 2);
 			auto result = game.board.search<0>(*game.cards, 9);
 			std::cout << "Result: " << result.score << std::endl;
-			result.next.invert().print();
+			result.next.print();
 			conn.submitMove(game, result.next);
 		}
 
