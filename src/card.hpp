@@ -5,32 +5,51 @@
 #include <array>
 #include <functional>
 #include <algorithm>
+#include <string_view>
 
 
-constexpr U32 BOAR		= 0b00000'00100'01010'00000'00000;
-constexpr U32 COBRA		= 0b00000'01000'00010'01000'00000;
-constexpr U32 CRAB		= 0b00000'00100'10001'00000'00000;
-constexpr U32 CRANE		= 0b00000'00100'00000'01010'00000;
-constexpr U32 DRAGON	= 0b00000'10001'00000'01010'00000;
-constexpr U32 EEL		= 0b00000'00010'01000'00010'00000;
-constexpr U32 ELEPHANT	= 0b00000'01010'01010'00000'00000;
-constexpr U32 FROG		= 0b00000'00010'00001'01000'00000;
-constexpr U32 GOOSE		= 0b00000'00010'01010'01000'00000;
-constexpr U32 HORSE		= 0b00000'00100'00010'00100'00000;
-constexpr U32 MANTIS	= 0b00000'01010'00000'00100'00000;
-constexpr U32 MONKEY	= 0b00000'01010'00000'01010'00000;
-constexpr U32 OX		= 0b00000'00100'01000'00100'00000;
-constexpr U32 RABBIT	= 0b00000'01000'10000'00010'00000;
-constexpr U32 ROOSTER	= 0b00000'01000'01010'00010'00000;
-constexpr U32 TIGER		= 0b00100'00000'00000'00100'00000;
 
-constexpr std::array<U32, 16> ALL_CARDS { BOAR, COBRA, CRAB, CRANE, DRAGON, EEL, ELEPHANT, FROG, GOOSE, HORSE, MANTIS, MONKEY, OX, RABBIT, ROOSTER, TIGER };
+struct Card {
+	const U32 bitboard;
+	const std::string_view name;
+
+	constexpr operator U32() const {
+		return bitboard;
+	}
+};
+
+constexpr auto BOAR     = Card{0b00000'00100'01010'00000'00000, "boar"};
+constexpr auto COBRA    = Card{0b00000'01000'00010'01000'00000, "cobra"};
+constexpr auto CRAB     = Card{0b00000'00100'10001'00000'00000, "crab"};
+constexpr auto CRANE    = Card{0b00000'00100'00000'01010'00000, "crane"};
+constexpr auto DRAGON   = Card{0b00000'10001'00000'01010'00000, "dragon"};
+constexpr auto EEL      = Card{0b00000'00010'01000'00010'00000, "eel"};
+constexpr auto ELEPHANT = Card{0b00000'01010'01010'00000'00000, "elephant"};
+constexpr auto FROG     = Card{0b00000'00010'00001'01000'00000, "frog"};
+constexpr auto GOOSE    = Card{0b00000'00010'01010'01000'00000, "goose"};
+constexpr auto HORSE    = Card{0b00000'00100'00010'00100'00000, "horse"};
+constexpr auto MANTIS   = Card{0b00000'01010'00000'00100'00000, "mantis"};
+constexpr auto MONKEY   = Card{0b00000'01010'00000'01010'00000, "monkey"};
+constexpr auto OX       = Card{0b00000'00100'01000'00100'00000, "ox"};
+constexpr auto RABBIT   = Card{0b00000'01000'10000'00010'00000, "rabbit"};
+constexpr auto ROOSTER  = Card{0b00000'01000'01010'00010'00000, "rooster"};
+constexpr auto TIGER    = Card{0b00100'00000'00000'00100'00000, "tiger"};
+
+constexpr std::array<Card, 16> ALL_CARDS_BY_NAME{ BOAR, COBRA, CRAB, CRANE, DRAGON, EEL, ELEPHANT, FROG, GOOSE, HORSE, MANTIS, MONKEY, OX, RABBIT, ROOSTER, TIGER };
+constexpr std::array<U32, 16>  ALL_CARDS        { BOAR, COBRA, CRAB, CRANE, DRAGON, EEL, ELEPHANT, FROG, GOOSE, HORSE, MANTIS, MONKEY, OX, RABBIT, ROOSTER, TIGER };
+
+
+const Card& findCard(const std::string_view& name);
+
+
+
 
 struct CardPermutation {
 	std::array<std::array<U8, 2>, 2> playerCards;
 	U8 sideCard;
     std::array<U8, 3> _padding;
 };
+
 
 
 

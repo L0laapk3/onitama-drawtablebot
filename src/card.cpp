@@ -5,6 +5,10 @@
 #include <algorithm>
 
 
+const Card& findCard(const std::string_view& name) {
+	return *std::find_if(ALL_CARDS_BY_NAME.begin(), ALL_CARDS_BY_NAME.end(), [&](const Card& card) { return card.name == name; });
+}
+
 void print(const MoveBoard& moves) {
 	for (U64 j = 0; j < 25; j += 5) {
 		for (int r = 5; r-- > 0;) {
