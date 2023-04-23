@@ -17,6 +17,17 @@ int main(int, char**) {
 	// });
 	// board.print();
 
-	auto result = board.search<0>(cards, 1);
-	std::cout << "Result: " << result.score << std::endl;
+	while (true) {
+		auto result = board.search<0>(cards, 9);
+		std::cout << "Result: " << result.score << std::endl;
+		result.next.print();
+		board = result.next;
+
+		result = board.search<1>(cards, 9);
+		std::cout << "Result: " << result.score << std::endl;
+		result.next.print();
+		board = result.next;
+	}
+
+	return 0;
 }

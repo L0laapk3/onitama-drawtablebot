@@ -7,14 +7,14 @@
 
 # =============================================================================
 # Project: drawbot
-# Configurations: Debug
+# Configurations: Release
 # =============================================================================
 # =============================================================================
 
 #############################################
 # Rule for compiling CXX files.
 
-rule CXX_COMPILER__drawbot_Debug
+rule CXX_COMPILER__drawbot_Release
   depfile = $DEP_FILE
   deps = gcc
   command = C:\PROGRA~1\LLVM\bin\CLANG_~1.EXE $DEFINES $INCLUDES $FLAGS -MD -MT $out -MF $DEP_FILE -o $out -c $in
@@ -24,7 +24,7 @@ rule CXX_COMPILER__drawbot_Debug
 #############################################
 # Rule for linking CXX executable.
 
-rule CXX_EXECUTABLE_LINKER__drawbot_Debug
+rule CXX_EXECUTABLE_LINKER__drawbot_Release
   command = cmd.exe /C "$PRE_LINK && C:\PROGRA~1\LLVM\bin\CLANG_~1.EXE -fuse-ld=lld-link -nostartfiles -nostdlib $FLAGS $LINK_FLAGS $in -o $TARGET_FILE -Xlinker /MANIFEST:EMBED -Xlinker /implib:$TARGET_IMPLIB -Xlinker /pdb:$TARGET_PDB -Xlinker /version:0.0  $LINK_PATH $LINK_LIBRARIES $MANIFESTS && $POST_BUILD"
   description = Linking CXX executable $TARGET_FILE
   restat = $RESTAT

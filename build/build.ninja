@@ -12,7 +12,7 @@
 
 # =============================================================================
 # Project: drawbot
-# Configurations: Debug
+# Configurations: Release
 # =============================================================================
 
 #############################################
@@ -24,7 +24,7 @@ ninja_required_version = 1.5
 #############################################
 # Set configuration variable for custom commands.
 
-CONFIGURATION = Debug
+CONFIGURATION = Release
 # =============================================================================
 # Include auxiliary files.
 
@@ -49,33 +49,33 @@ cmake_ninja_workdir = C$:/Users/Kris/Documents/coding/onitama-drawbot/build/
 
 build cmake_object_order_depends_target_drawbot: phony || CMakeFiles/drawbot.dir
 
-build CMakeFiles/drawbot.dir/src/BoardUtil.cpp.obj: CXX_COMPILER__drawbot_Debug C$:/Users/Kris/Documents/coding/onitama-drawbot/src/BoardUtil.cpp || cmake_object_order_depends_target_drawbot
+build CMakeFiles/drawbot.dir/src/BoardUtil.cpp.obj: CXX_COMPILER__drawbot_Release C$:/Users/Kris/Documents/coding/onitama-drawbot/src/BoardUtil.cpp || cmake_object_order_depends_target_drawbot
   DEP_FILE = CMakeFiles\drawbot.dir\src\BoardUtil.cpp.obj.d
-  FLAGS = -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto -std=gnu++2b
+  FLAGS = -march=native -O3 -DNDEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrt -Ofast -flto -std=gnu++2b
   OBJECT_DIR = CMakeFiles\drawbot.dir
   OBJECT_FILE_DIR = CMakeFiles\drawbot.dir\src
   TARGET_COMPILE_PDB = CMakeFiles\drawbot.dir\
   TARGET_PDB = drawbot.pdb
 
-build CMakeFiles/drawbot.dir/src/card.cpp.obj: CXX_COMPILER__drawbot_Debug C$:/Users/Kris/Documents/coding/onitama-drawbot/src/card.cpp || cmake_object_order_depends_target_drawbot
+build CMakeFiles/drawbot.dir/src/card.cpp.obj: CXX_COMPILER__drawbot_Release C$:/Users/Kris/Documents/coding/onitama-drawbot/src/card.cpp || cmake_object_order_depends_target_drawbot
   DEP_FILE = CMakeFiles\drawbot.dir\src\card.cpp.obj.d
-  FLAGS = -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto -std=gnu++2b
+  FLAGS = -march=native -O3 -DNDEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrt -Ofast -flto -std=gnu++2b
   OBJECT_DIR = CMakeFiles\drawbot.dir
   OBJECT_FILE_DIR = CMakeFiles\drawbot.dir\src
   TARGET_COMPILE_PDB = CMakeFiles\drawbot.dir\
   TARGET_PDB = drawbot.pdb
 
-build CMakeFiles/drawbot.dir/src/easywsclient.cpp.obj: CXX_COMPILER__drawbot_Debug C$:/Users/Kris/Documents/coding/onitama-drawbot/src/easywsclient.cpp || cmake_object_order_depends_target_drawbot
+build CMakeFiles/drawbot.dir/src/easywsclient.cpp.obj: CXX_COMPILER__drawbot_Release C$:/Users/Kris/Documents/coding/onitama-drawbot/src/easywsclient.cpp || cmake_object_order_depends_target_drawbot
   DEP_FILE = CMakeFiles\drawbot.dir\src\easywsclient.cpp.obj.d
-  FLAGS = -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto -std=gnu++2b
+  FLAGS = -march=native -O3 -DNDEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrt -Ofast -flto -std=gnu++2b
   OBJECT_DIR = CMakeFiles\drawbot.dir
   OBJECT_FILE_DIR = CMakeFiles\drawbot.dir\src
   TARGET_COMPILE_PDB = CMakeFiles\drawbot.dir\
   TARGET_PDB = drawbot.pdb
 
-build CMakeFiles/drawbot.dir/src/main.cpp.obj: CXX_COMPILER__drawbot_Debug C$:/Users/Kris/Documents/coding/onitama-drawbot/src/main.cpp || cmake_object_order_depends_target_drawbot
+build CMakeFiles/drawbot.dir/src/main.cpp.obj: CXX_COMPILER__drawbot_Release C$:/Users/Kris/Documents/coding/onitama-drawbot/src/main.cpp || cmake_object_order_depends_target_drawbot
   DEP_FILE = CMakeFiles\drawbot.dir\src\main.cpp.obj.d
-  FLAGS = -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto -std=gnu++2b
+  FLAGS = -march=native -O3 -DNDEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrt -Ofast -flto -std=gnu++2b
   OBJECT_DIR = CMakeFiles\drawbot.dir
   OBJECT_FILE_DIR = CMakeFiles\drawbot.dir\src
   TARGET_COMPILE_PDB = CMakeFiles\drawbot.dir\
@@ -89,8 +89,8 @@ build CMakeFiles/drawbot.dir/src/main.cpp.obj: CXX_COMPILER__drawbot_Debug C$:/U
 #############################################
 # Link the executable drawbot.exe
 
-build drawbot.exe: CXX_EXECUTABLE_LINKER__drawbot_Debug CMakeFiles/drawbot.dir/src/BoardUtil.cpp.obj CMakeFiles/drawbot.dir/src/card.cpp.obj CMakeFiles/drawbot.dir/src/easywsclient.cpp.obj CMakeFiles/drawbot.dir/src/main.cpp.obj
-  FLAGS = -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto
+build drawbot.exe: CXX_EXECUTABLE_LINKER__drawbot_Release CMakeFiles/drawbot.dir/src/BoardUtil.cpp.obj CMakeFiles/drawbot.dir/src/card.cpp.obj CMakeFiles/drawbot.dir/src/easywsclient.cpp.obj CMakeFiles/drawbot.dir/src/main.cpp.obj
+  FLAGS = -march=native -O3 -DNDEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrt -Ofast -flto
   LINK_FLAGS = -Xlinker /subsystem:console
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 -loldnames
   OBJECT_DIR = CMakeFiles\drawbot.dir

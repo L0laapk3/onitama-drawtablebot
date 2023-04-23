@@ -45,7 +45,7 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto"
+					"fragment" : "-march=native -O3 -DNDEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrt -Ofast -flto"
 				},
 				{
 					"fragment" : "-std=gnu++2b"
@@ -75,7 +75,7 @@
 		"commandFragments" : 
 		[
 			{
-				"fragment" : "-march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto",
+				"fragment" : "-march=native -O3 -DNDEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrt -Ofast -flto",
 				"role" : "flags"
 			},
 			{
