@@ -1,0 +1,5 @@
+# ninja log v5
+4	376	6902413699958264	CMakeFiles/drawbot.dir/src/easywsclient.cpp.obj	8f1e78fc21a0c12e
+3	796	6902413704138251	CMakeFiles/drawbot.dir/src/Main.cpp.obj	bfecc15c9f0bf50c
+2	18	6902428817314778	CMakeFiles/drawbot.dir/src/Connection.cpp.obj	a685f786b2e58b03
+19	196	6902428818963970	drawbot.exe	270cd5ba428f49de

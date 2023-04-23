@@ -1,0 +1,5 @@
+C:/Users/Kris/Documents/coding/onitama-drawbot/build/CMakeFiles/drawbot.dir
+C:/Users/Kris/Documents/coding/onitama-drawbot/build/CMakeFiles/package.dir
+C:/Users/Kris/Documents/coding/onitama-drawbot/build/CMakeFiles/package_source.dir
+C:/Users/Kris/Documents/coding/onitama-drawbot/build/CMakeFiles/edit_cache.dir
+C:/Users/Kris/Documents/coding/onitama-drawbot/build/CMakeFiles/rebuild_cache.dir

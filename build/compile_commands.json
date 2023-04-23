@@ -1,0 +1,22 @@
+[
+{
+  "directory": "C:/Users/Kris/Documents/coding/onitama-drawbot/build",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\CLANG_~1.EXE -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto -std=gnu++20 -o CMakeFiles\\drawbot.dir\\src\\Connection.cpp.obj -c C:\\Users\\Kris\\Documents\\coding\\onitama-drawbot\\src\\Connection.cpp",
+  "file": "C:\\Users\\Kris\\Documents\\coding\\onitama-drawbot\\src\\Connection.cpp"
+},
+{
+  "directory": "C:/Users/Kris/Documents/coding/onitama-drawbot/build",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\CLANG_~1.EXE -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto -std=gnu++20 -o CMakeFiles\\drawbot.dir\\src\\Game.cpp.obj -c C:\\Users\\Kris\\Documents\\coding\\onitama-drawbot\\src\\Game.cpp",
+  "file": "C:\\Users\\Kris\\Documents\\coding\\onitama-drawbot\\src\\Game.cpp"
+},
+{
+  "directory": "C:/Users/Kris/Documents/coding/onitama-drawbot/build",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\CLANG_~1.EXE -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto -std=gnu++20 -o CMakeFiles\\drawbot.dir\\src\\Main.cpp.obj -c C:\\Users\\Kris\\Documents\\coding\\onitama-drawbot\\src\\Main.cpp",
+  "file": "C:\\Users\\Kris\\Documents\\coding\\onitama-drawbot\\src\\Main.cpp"
+},
+{
+  "directory": "C:/Users/Kris/Documents/coding/onitama-drawbot/build",
+  "command": "C:\\PROGRA~1\\LLVM\\bin\\CLANG_~1.EXE -march=native -g -Xclang -gcodeview -O0 -D_DEBUG -D_DLL -D_MT -Xclang --dependent-lib=msvcrtd -flto -std=gnu++20 -o CMakeFiles\\drawbot.dir\\src\\easywsclient.cpp.obj -c C:\\Users\\Kris\\Documents\\coding\\onitama-drawbot\\src\\easywsclient.cpp",
+  "file": "C:\\Users\\Kris\\Documents\\coding\\onitama-drawbot\\src\\easywsclient.cpp"
+}
+]
