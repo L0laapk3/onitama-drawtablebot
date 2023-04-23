@@ -1,0 +1,8 @@
+{
+	"files.associations": {
+		"*.bazel": "bazel",
+		"limits": "cpp",
+		"array": "cpp",
+		"algorithm": "cpp"
+	}
+}
