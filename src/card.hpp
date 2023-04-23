@@ -173,7 +173,7 @@ constexpr auto combineMoveBoards(const MoveBoard& a, const MoveBoard& b) {
 
 
 
-typedef std::array<U32, 5> CardSet;
+typedef std::array<Card, 5> CardSet;
 typedef std::array<MoveBoard, 2> MoveBoardDir;
 typedef std::array<MoveBoardDir, 5> MoveBoardSet;
 

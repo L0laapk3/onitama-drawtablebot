@@ -23,13 +23,13 @@ public:
 	void sendJoin(const std::string& matchId);
 
 	struct LoadResult {
+		bool myTurn;
 		CardsInfo cards;
 		Board board;
-		bool myTurn;
 	};
 	LoadResult load();
-	// void waitTurn(Game& game);
-	// void submitMove(Game& game, const Board& board);
+	void waitTurn(Game& game);
+	void submitMove(Game& game, const Board& board);
 
 	std::string matchId;
 	std::string token;
@@ -37,7 +37,6 @@ public:
 
 	int index;
 	bool player;
-	bool currentTurn;
 	bool ended = false;
 
 private:

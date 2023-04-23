@@ -2,6 +2,7 @@
 #include "boardSearch.hpp"
 #include "card.hpp"
 #include "connection.h"
+#include "game.h"
 
 #include <iostream>
 
@@ -28,22 +29,24 @@ int main(int argc, char** argv) {
 	else
 		conn.sendCreate();
 
-	// Game game(conn);
+	Game game(conn);
 
-	// while (true) {
-	// 	// game.board.print(game.cards);
-	// 	// std::cout << game.board.eval(game.cards) << std::endl;
-	// 	if (!game.board.currentPlayer()) {
-	// 		auto bestMove = game.searchTime(game.board, 10000, 2);
-	// 		conn.submitMove(game, bestMove.board);
-	// 	}
+	while (true) {
+		game.board.invert().print();
+		if (game.myTurn) {
+			// auto bestMove = game.searchTime(game.board, 10000, 2);
+			auto result = game.board.search<0>(*game.cards, 9);
+			std::cout << "Result: " << result.score << std::endl;
+			result.next.invert().print();
+			conn.submitMove(game, result.next);
+		}
 
-	// 	conn.waitTurn(game);
-	// 	if (conn.ended) {
-	// 		std::cout << (game.board.winner() ? "lost" : "won") << std::endl;
-	// 		break;
-	// 	}
-	// }
+		conn.waitTurn(game);
+		if (conn.ended) {
+			std::cout << "ended" << std::endl;
+			break;
+		}
+	}
 
 	return 0;
 }

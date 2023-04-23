@@ -1,14 +1,16 @@
 #include "game.h"
 
-
+// leak some memory, whatever
 Game::Game(std::array<std::string, 5> cardNames, std::string boardString, bool player, bool flipped) :
-	Game(Connection::parseCards(cardNames, flipped), Connection::parseBoard(boardString, flipped), player) { }
+	Game(new CardsInfo(Connection::parseCards(cardNames, flipped)), Connection::parseBoard(boardString, flipped), player) { }
 
-Game::Game(Connection& connection) : _loadResult(connection.load()), cards(_loadResult.cards), board(_loadResult.board) {
+Game::Game(Connection& connection) : Game(connection.load()) { }
+
+Game::Game(const Connection::LoadResult loadResult, bool player) : cards(new CardsInfo(loadResult.cards)), board(loadResult.board), myTurn(loadResult.myTurn) {
 	init();
 }
 
-Game::Game(const CardsInfo& cards, const Board& board, bool player) : cards(cards), board(board), myTurn(!player) {
+Game::Game(const CardsInfo* cards, const Board& board, bool player, bool myTurn) : cards(cards), board(board), myTurn(myTurn) {
 	init();
 }
 
