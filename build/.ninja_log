@@ -1,5 +1,18 @@
 # ninja log v5
-4	376	6902413699958264	CMakeFiles/drawbot.dir/src/easywsclient.cpp.obj	8f1e78fc21a0c12e
+12	594	7039485715243741	CMakeFiles/drawbot.dir/src/easywsclient.cpp.obj	1ab7807aaf4803c5
 3	796	6902413704138251	CMakeFiles/drawbot.dir/src/Main.cpp.obj	bfecc15c9f0bf50c
+11	555	7039616179585198	CMakeFiles/drawbot.dir/src/boardEval.cpp.obj	fe6517e4bded6559
+2	553	7039616770924699	CMakeFiles/drawbot.dir/src/boardSearch.cpp.obj	8330a005e7090a3e
 2	18	6902428817314778	CMakeFiles/drawbot.dir/src/Connection.cpp.obj	a685f786b2e58b03
-19	196	6902428818963970	drawbot.exe	270cd5ba428f49de
+283	365	7039486074549680	drawbot.exe	7360ef35a77ce121
+17	516	7039617402683526	CMakeFiles/drawbot.dir/src/main.cpp.obj	f0107e429dd5e43f
+12	845	7039593074554400	CMakeFiles/drawbot.dir/src/boardIterate.cpp.obj	8c8652efdbbd7151
+8	471	7039616178754640	CMakeFiles/drawbot.dir/src/BoardUtil.cpp.obj	50530fb0ea80fcef
+25	804	7039593074148932	CMakeFiles/drawbot.dir/src/card.cpp.obj	8a538f4889c8dba5
+17	547	7039616179505136	CMakeFiles/drawbot.dir/src/boardWin.cpp.obj	721db28c798d74fb
+12	547	7039616179505136	CMakeFiles/drawbot.dir/src/boardIter.cpp.obj	3386d548dac0bacf
+7	464	7039617721109592	CMakeFiles/drawbot.dir/src/BoardUtil.cpp.obj	50530fb0ea80fcef
+10	472	7039617721149687	CMakeFiles/drawbot.dir/src/main.cpp.obj	f0107e429dd5e43f
+7	632	7039617862183002	CMakeFiles/drawbot.dir/src/main.cpp.obj	f0107e429dd5e43f
+7	630	7039618065805620	CMakeFiles/drawbot.dir/src/main.cpp.obj	f0107e429dd5e43f
+630	752	7039618066916286	drawbot.exe	7a61f6001308f471
