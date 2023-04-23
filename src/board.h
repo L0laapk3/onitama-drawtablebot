@@ -23,12 +23,14 @@ class Board {
 public:
     std::array<U32, 2> p;
     std::array<U32, 2> k;
-	U8 cardsIndex;
+	U8 cardI;
+
 
 	// boardUtil.cpp
 	static Board create(const CardsInfo& cards, std::array<U32, 2> p = { 0b11111'00000'00000'00000'00000, 0b00000'00000'00000'00000'11111 }, std::array<U32, 2> k = { 0b00100'00000'00000'00000'00000, 0b00000'00000'00000'00000'00100 });
 	void print() const;
 	Board invert() const;
+	bool operator==(const Board& other) const;
 
 	// boardWin.hpp
 	static constexpr std::array<U32, 2> TEMPLE = { 22, 2 };
@@ -58,13 +60,13 @@ public:
 
 	// boardIter.hpp
 	template<bool player>
-	void iterateMoves(bool quiesence, const std::function<bool()> f);
+	void iterateMoves(const CardsInfo& cards, bool quiesence, const std::function<bool()> f);
 
 	// boardSearch.hpp
 	template<bool player, bool root = false>
-	std::conditional_t<root, SearchResult, Score> search(Score alpha, Score beta, Depth depthLeft);
+	std::conditional_t<root, SearchResult, Score> search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft);
 	template<bool player>
-	SearchResult search(Depth depth);
+	SearchResult search(const CardsInfo& cards, Depth depth);
 };
 
 struct SearchResult {

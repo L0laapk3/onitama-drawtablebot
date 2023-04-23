@@ -1,4 +1,4 @@
-#include "Card.hpp"
+#include "card.hpp"
 
 #include <iostream>
 #include <vector>
@@ -21,25 +21,6 @@ void print(const MoveBoard& moves) {
 	}
 }
 
-
-
-void iterateCardCombinations(std::function<void(const CardsInfo&, const std::array<U32, 5>&)> cb) {
-    std::vector<bool> v(16, false);
-    std::fill(v.begin(), v.begin() + 5, true);
-    do {
-		U64 cardsFilled = 0;
-		std::array<U32, 5> cards;
-		std::array<U32, 5> cardsIndexes;
-        for (int i = 0; i < 16; ++i) {
-            if (v[i]) {
-                cardsIndexes[cardsFilled] = i;
-				cards[cardsFilled++] = ALL_CARDS[i];
-            }
-        }
-		CardsInfo cardsInfo{ cards };
-		cb(cardsInfo, cardsIndexes);
-    } while (std::prev_permutation(v.begin(), v.end()));
-}
 
 
 const CardsInfo CARDS_PERFT{ BOAR, OX, ELEPHANT, HORSE, CRAB };

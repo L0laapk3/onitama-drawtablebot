@@ -45,3 +45,8 @@ Board Board::invert() const {
 	}
 	return board;
 }
+
+
+bool Board::operator==(const Board& other) const {
+	return p[0] == other.p[0] && p[1] == other.p[1] && k[0] == other.k[0] && k[1] == other.k[1] && cardI == other.cardI;
+}

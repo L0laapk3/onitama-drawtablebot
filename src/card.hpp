@@ -29,6 +29,7 @@ constexpr std::array<U32, 16> ALL_CARDS { BOAR, COBRA, CRAB, CRANE, DRAGON, EEL,
 struct CardPermutation {
 	std::array<std::array<U8, 2>, 2> playerCards;
 	U8 sideCard;
+    std::array<U8, 3> _padding;
 };
 
 
@@ -153,58 +154,29 @@ constexpr auto combineMoveBoards(const MoveBoard& a, const MoveBoard& b) {
 
 
 
-
 typedef std::array<U32, 5> CardSet;
-typedef std::array<MoveBoard, 5> MoveBoardSet;
+typedef std::array<MoveBoard, 2> MoveBoardDir;
+typedef std::array<MoveBoardDir, 5> MoveBoardSet;
 
-template<bool invert>
-constexpr auto generateMoveBoardSet(const CardSet& cards) {
+constexpr auto generateMoveBoardSets(const CardSet& cards) {
 	MoveBoardSet moveBoards;
 	for (U64 i = 0; i < 5; i++)
-		moveBoards[i] = generateMoveBoard<invert>(cards[i]);
+		moveBoards[i] = {
+			generateMoveBoard<false>(cards[i]),
+			generateMoveBoard<true>(cards[i]),
+		};
     return moveBoards;
 }
 
 
-
 struct CardsInfo {
 	CardSet cards;
-	MoveBoardSet moveBoardsForward = generateMoveBoardSet<false>(cards);
-	MoveBoardSet moveBoardsReverse = generateMoveBoardSet<true>(cards);
+	MoveBoardSet moveBoards = generateMoveBoardSets(cards);
 };
 
 
+
 void print(const MoveBoard& moves);
-
-void iterateCardCombinations(std::function<void(const CardsInfo&, const std::array<U32, 5>&)> cb);
-
-
-constexpr auto UNLOAD_ORDER = []() {
-	std::array<std::array<U8, 30>, 30> order{};
-	for (U64 currentCardI = 0; currentCardI < 30; currentCardI++) {
-		std::array<bool, 30> hasSeen{false};
-		U8 orderIndex = 29;
-		for (U8 i = 0; i < 30; i++) {
-			U8 cardI = (currentCardI + i) % 30;
-			U64 invCardI = CARDS_INVERT[cardI];
-			for (U8 usedCardI : std::array<U8, 5>{
-				cardI,
-				CARDS_SWAP[invCardI][1][0],
-				CARDS_SWAP[invCardI][1][1],
-				CARDS_SWAP[invCardI][0][0],
-				CARDS_SWAP[invCardI][0][1],
-			}) {
-				if (!hasSeen[usedCardI]) {
-					order[currentCardI][orderIndex--] = usedCardI;
-					hasSeen[usedCardI] = true;
-				}
-			}
-		}
-	}
-	return order;
-}();
-
-
 
 
 

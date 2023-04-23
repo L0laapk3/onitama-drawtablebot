@@ -6,8 +6,17 @@
 
 
 int main(int, char**) {
-	Board board = Board::create(CARDS_PERFT);
+	auto& cards = CARDS_PERFT;
 
-	auto result = board.search<0>(5);
+	Board board = Board::create(cards);
+
+	// board.print();
+	// board.iterateMoves<0>(cards, false, [&]() {
+	// 	board.print();
+	// 	return true;
+	// });
+	// board.print();
+
+	auto result = board.search<0>(cards, 1);
 	std::cout << "Result: " << result.score << std::endl;
 }
