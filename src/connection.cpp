@@ -173,6 +173,7 @@ void Connection::waitTurn(Game& game) {
 		});
 	}
 	game.board = parseBoard(boardStr, !player);
+	delete game.cards;
 	game.cards = new CardsInfo(parseCards(cards, player));
 }
 
