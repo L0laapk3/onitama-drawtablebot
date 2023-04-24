@@ -18,7 +18,7 @@ constexpr std::array<Score, 33> pawnScores{
 	0, 1, 2, 1, 0,
 };
 constexpr std::array<Score, 25> kingScores{
-	13, 25, 0, 25, 13,
+	13, 25, 40, 25, 13,
 	10, 17, 25, 17, 10,
 	7, 10, 14, 10, 7,
 	3, 6, 9, 6, 3,

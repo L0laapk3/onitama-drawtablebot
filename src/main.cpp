@@ -15,14 +15,19 @@ int main(int argc, char** argv) {
 		Board board = Board::create();
 		board.p[1] = board.k[1];
 
+		bool player = 0;
 		while (true) {
-			for (int player = 0; player < 2; player++) {
-				board.print();
-				const auto& result = !player ? board.search<0>(cards.moveBoards, 5) : board.search<1>(cards.moveBoards, 5);
-				std::cout << "Result: " << result.score << std::endl;
-				board = result.board;
-				if (result.winningMove)
-					return 0;
+			board.print(cards);
+			const auto& result = board.search(cards, player, 5);
+			std::cout << "Result: " << result.score << std::endl;
+			board = result.board;
+			player = !player;
+
+			if (result.winningMove)
+				return 0;
+			if (!result.foundMove) {
+				std::cerr << "didnt find any moves" << std::endl;
+				return 1;
 			}
 		}
 		return 0;
@@ -39,12 +44,11 @@ int main(int argc, char** argv) {
 	Game game(conn);
 
 	while (true) {
-		game.board.print();
+		game.board.print(*game.cards, game.myTurn);
 		if (game.myTurn) {
 			// auto bestMove = game.searchTime(game.board, 10000, 2);
-			auto result = game.board.search<0>(game.cards->moveBoards, 1);
+			auto result = game.board.searchTime(*game.cards, 0, 1000);
 			std::cout << "Result: " << result.score << std::endl;
-			result.board.print();
 			conn.submitMove(game, result.board, 0);
 		}
 

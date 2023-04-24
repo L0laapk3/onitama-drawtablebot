@@ -19,6 +19,7 @@ enum SCORE : int {
 typedef int Depth;
 
 struct SearchResult;
+struct SearchTimeResult;
 class Board {
 public:
     std::array<U32, 2> p;
@@ -28,10 +29,14 @@ public:
 
 	// boardUtil.cpp
 	static Board create(std::array<U32, 2> p = { 0b00000'00000'00000'00000'11111, 0b11111'00000'00000'00000'00000 }, std::array<U32, 2> k = { 0b00000'00000'00000'00000'00100, 0b00100'00000'00000'00000'00000 });
-	void print() const;
+private:
+	void print(const CardsInfo& cards, char turnIndicator) const;
+public:
+	void print(const CardsInfo& cards) const;
+	void print(const CardsInfo& cards, bool player) const;
 	Board invert() const;
-	void checkValid(bool isWon = false) const;
-	void assertValid(bool isWon = false) const;
+	void checkValid(const CardsInfo& cards, bool isWon = false) const;
+	void assertValid(const CardsInfo& cards, bool isWon = false) const;
 	bool operator==(const Board& other) const;
 
 	// boardWin.hpp
@@ -64,13 +69,14 @@ public:
 
 	// boardIter.hpp
 	template<bool player>
-	void iterateMoves(const MoveBoardSet& moveBoards, bool quiesence, const std::function<bool()> f);
+	void iterateMoves(const CardsInfo& cards, bool quiesence, const std::function<bool()> f);
 
 	// boardSearch.hpp
 	template<bool player, bool root = false>
-	std::conditional_t<root, SearchResult, Score> search(const MoveBoardSet& moveBoards, Score alpha, Score beta, Depth depthLeft);
-	template<bool player>
-	SearchResult search(const MoveBoardSet& moveBoards, Depth depth);
+	std::conditional_t<root, SearchResult, Score> search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft);
+	SearchResult search(const CardsInfo& cards, bool player, Depth depth, Score alpha = SCORE::LOSE, Score beta = SCORE::WIN);
+	SearchTimeResult searchTime(const CardsInfo& cards, bool player, int timeMs, Score alpha = SCORE::LOSE, Score beta = SCORE::WIN);
+	// SearchTimeResult searchTimeWithPanic(const CardsInfo& cards, bool player, int timeMs, SearchTimeResult& lastResult);
 };
 
 struct SearchResult {
@@ -79,4 +85,8 @@ struct SearchResult {
 	bool foundMove = true;
 	bool winningMove = false;
 	operator Score() const { return score; };
+};
+struct SearchTimeResult : public SearchResult {
+	Depth depth;
+	S64 timeMs;
 };

@@ -28,4 +28,4 @@ void print(const MoveBoard& moves) {
 
 
 
-const CardsInfo CARDS_PERFT{ BOAR, OX, ELEPHANT, HORSE, CRAB };
+const CardsInfo CARDS_PERFT = CardsInfo::create({ BOAR, OX, ELEPHANT, HORSE, CRAB });

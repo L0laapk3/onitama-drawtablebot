@@ -9,11 +9,11 @@
 // assumes p0 is to move
 // assumes the board is not a win in 1
 template<bool player>
-inline void Board::iterateMoves(const MoveBoardSet& moveBoards, bool quiesence, const std::function<bool()> f) {
+inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const std::function<bool()> f) {
 	Board beforeBoard = *this;
 
 	U8 thisCardI = cardI;
-	const auto& moveList = moveBoards[CARDS_HAND[player][cardI]];
+	const auto& moveList = cards.moveBoards[CARDS_HAND[player][cardI]];
 
 	bool cont = true;
 	U32 sourceBits = p[player];
@@ -50,7 +50,7 @@ inline void Board::iterateMoves(const MoveBoardSet& moveBoards, bool quiesence, 
 
 					cardI = CARDS_SWAP[thisCardI][player][i];
 
-					assertValid();
+					assertValid(cards);
 
 					Board beforeBoard2 = *this;
 					if (!f) std::unreachable();
@@ -71,7 +71,7 @@ inline void Board::iterateMoves(const MoveBoardSet& moveBoards, bool quiesence, 
 		p[player] |= sourcePiece;
 		k[player] |= sourceKing;
 
-		assertValid();
+		assertValid(cards);
 	} while (sourceBits && cont);
 	cardI = thisCardI;
 

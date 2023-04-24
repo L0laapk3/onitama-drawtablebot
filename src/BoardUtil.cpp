@@ -12,11 +12,11 @@ Board Board::create(std::array<U32, 2> p, std::array<U32, 2> k) {
 }
 
 
-void Board::checkValid(bool isWon) const {
+void Board::checkValid(const CardsInfo& cards, bool isWon) const {
 	auto test = [&](bool result) {
 		if (!result) {
 			std::cout << "Invalid board!" << std::endl;
-			print();
+			print(cards);
 			assert(false);
 		}
 	};
@@ -40,14 +40,27 @@ void Board::checkValid(bool isWon) const {
 	test(cardI < 30);
 }
 
-void Board::assertValid(bool isWon) const {
+void Board::assertValid(const CardsInfo& cards, bool isWon) const {
 #ifndef NDEBUG
-	checkValid(isWon);
+	checkValid(cards, isWon);
 #endif
 }
 
-void Board::print() const {
+std::string cardsShortName(Card card, int length) {
+	std::string res = "";
+	for (U32 i = 0; i < length; i++)
+		res += card.name.size() > i ? card.name[i] : ' ';
+	return res;
+}
+void Board::print(const CardsInfo& cards, char turnIndicator) const {
+	auto perm = CARDS_PERMUTATIONS[cardI];
+
+	std::cout << std::endl << cardsShortName(cards.cards[perm.playerCards[0][0]], 4) << ' ' << cardsShortName(cards.cards[perm.playerCards[0][1]], 4) << std::endl;
+
+	auto sideCard = cardsShortName(cards.cards[perm.sideCard], 5);
 	for (int r = 0; r < 5; r++) {
+		std::cout << (r == 4 ? turnIndicator : ' ') << '|';
+
 		for (int c = 5; c --> 0;) {
 			const int mask = 1 << (5 * r + c);
 			if (p[0] & mask) {
@@ -55,15 +68,21 @@ void Board::print() const {
 				else if (k[0] & mask)        std::cout << 'X';
 				else                         std::cout << '+';
 			} else if (p[1] & mask) {
-				if (k[1] & mask)             std::cout << 'O';
+				if (k[1] & mask)             std::cout << '0';
 				else                         std::cout << 'o';
 			} else if ((k[0] | k[1]) & mask) std::cout << '!'; // invalid
 			else                             std::cout << '.';
 		}
-		std::cout << std::endl;
+		std::cout << '|' << sideCard[r] << std::endl;
 	}
-	std::cout << std::endl;
+	std::cout << cardsShortName(cards.cards[perm.playerCards[1][0]], 4) << ' ' << cardsShortName(cards.cards[perm.playerCards[1][1]], 4) << std::endl << std::endl;
 }
+void Board::print(const CardsInfo& cards) const {
+	print(cards, ' ');
+};
+void Board::print(const CardsInfo& cards, bool player) const {
+	print(cards, player ? 'X' : '0');
+};
 
 
 Board Board::invert() const {

@@ -112,13 +112,13 @@ Board Connection::parseBoard(std::string str, bool flip) {
 }
 
 CardsInfo Connection::parseCards(std::array<std::string, 5> cardNames, bool flipped) {
-    return CardsInfo{
+    return CardsInfo::create({
         findCard(cardNames[flipped ? 2 : 0]),
         findCard(cardNames[flipped ? 3 : 1]),
         findCard(cardNames[flipped ? 0 : 2]),
         findCard(cardNames[flipped ? 1 : 3]),
         findCard(cardNames[4]),
-    };
+    });
 }
 
 Connection::LoadResult Connection::load() {
@@ -144,11 +144,12 @@ Connection::LoadResult Connection::load() {
 		});
 		if (boardStr.size()) {
 			Board board = parseBoard(boardStr, player);
-			board.checkValid();
+			auto cardsInfo = parseCards(cards, player);
+			board.checkValid(cardsInfo);
 			return {
 				.player = player,
 				.myTurn = myTurn,
-				.cards = parseCards(cards, player),
+				.cards = cardsInfo,
 				.board = board,
 			};
 		}
@@ -173,10 +174,11 @@ void Connection::waitTurn(Game& game) {
 			game.ended = getString(message, "gameState") == "ended";
 		});
 	}
-	game.board = parseBoard(boardStr, game.player);
-	game.board.checkValid(game.ended);
 	delete game.cards;
 	game.cards = new CardsInfo(parseCards(cards, game.player));
+
+	game.board = parseBoard(boardStr, game.player);
+	game.board.checkValid(*game.cards, game.ended);
 }
 
 std::string indexToPos(U32 i, bool flipped) {

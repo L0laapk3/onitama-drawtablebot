@@ -13,7 +13,7 @@ struct Card {
 	const U32 bitboard;
 	const std::string_view name;
 
-	constexpr operator U32() const {
+	constexpr operator const U32&() const {
 		return bitboard;
 	}
 };
@@ -223,8 +223,15 @@ constexpr auto CARDS_HAND = [](){
 
 
 struct CardsInfo {
+	MoveBoardSet moveBoards;
 	CardSet cards;
-	MoveBoardSet moveBoards = generateMoveBoardSet(cards);
+
+	static CardsInfo create(CardSet cards) {
+		return {
+			generateMoveBoardSet(cards),
+			cards
+		};
+	};
 };
 
 
