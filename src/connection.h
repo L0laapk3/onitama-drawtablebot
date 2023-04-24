@@ -23,6 +23,7 @@ public:
 	void sendJoin(const std::string& matchId);
 
 	struct LoadResult {
+		bool player;
 		bool myTurn;
 		CardsInfo cards;
 		Board board;
@@ -36,8 +37,6 @@ public:
 	std::string opponent;
 
 	int index;
-	bool player;
-	bool ended = false;
 
 private:
 	void handleJoinGame();

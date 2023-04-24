@@ -42,8 +42,8 @@ int main(int argc, char** argv) {
 		}
 
 		conn.waitTurn(game);
-		if (conn.ended) {
-			std::cout << "ended" << std::endl;
+		if (game.ended) {
+			std::cout << (!game.myTurn ? "won" : "lost") << std::endl;
 			break;
 		}
 	}

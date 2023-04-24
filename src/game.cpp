@@ -6,7 +6,7 @@ Game::Game(std::array<std::string, 5> cardNames, std::string boardString, bool p
 
 Game::Game(Connection& connection) : Game(connection.load()) { }
 
-Game::Game(const Connection::LoadResult loadResult, bool player) : cards(new CardsInfo(loadResult.cards)), board(loadResult.board), myTurn(loadResult.myTurn) {
+Game::Game(const Connection::LoadResult loadResult) : cards(new CardsInfo(loadResult.cards)), board(loadResult.board), myTurn(loadResult.myTurn), player(loadResult.player) {
 	init();
 }
 

@@ -129,7 +129,7 @@ Connection::LoadResult Connection::load() {
 		ws->poll(-1);
 		assert(ws->getReadyState() != easywsclient::WebSocket::CLOSED);
 		std::array<std::string, 5> cards;
-		bool myTurn;
+		bool myTurn, player;
 		ws->dispatch([&](const std::string& message) {
 			boardStr = getString(message, "board");
 			if (boardStr.size()) {
@@ -144,12 +144,11 @@ Connection::LoadResult Connection::load() {
 		});
 		if (boardStr.size()) {
 			return {
+				.player = player,
 				.myTurn = myTurn,
 				.cards = parseCards(cards, player),
 				.board = parseBoard(boardStr, player),
 			};
-			// loadedBoard = Board::fromString(boardStr, !currentTurn, player);
-			// return CardBoard::fetchGameCards(cards, player);
 		}
 	}
 }
@@ -168,13 +167,13 @@ void Connection::waitTurn(Game& game) {
 			cards[2] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"([^\"]+)\"");
 			cards[3] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"[^\"]+\",\"([^\"]+)\"");
 			cards[4] = getRegex(message, "\"cards\":[^}]+\"side\":\"([^\"]+)\"");
-			game.myTurn = getString(message, "currentTurn") == (player ? "red" : "blue");
-			ended = getString(message, "gameState") == "ended";
+			game.myTurn = getString(message, "currentTurn") == (game.player ? "red" : "blue");
+			game.ended = getString(message, "gameState") == "ended";
 		});
 	}
-	game.board = parseBoard(boardStr, player);
+	game.board = parseBoard(boardStr, game.player);
 	delete game.cards;
-	game.cards = new CardsInfo(parseCards(cards, player));
+	game.cards = new CardsInfo(parseCards(cards, game.player));
 }
 
 std::string indexToPos(U32 i, bool flipped) {
@@ -187,7 +186,7 @@ void Connection::submitMove(Game& game, const Board& board, bool flipped) {
 	U32 to   = _tzcnt_u32(board.p[flipped] & ~game.board.p[flipped]);
 	auto permutation = CARDS_PERMUTATIONS[board.cardI];
 	const Card& card = game.cards->cards[permutation.sideCard];
-	const std::string moveStr = std::string(card.name) + ' ' + indexToPos(from, player != flipped) + indexToPos(to, player != flipped);
+	const std::string moveStr = std::string(card.name) + ' ' + indexToPos(from, game.player != flipped) + indexToPos(to, game.player != flipped);
 	std::cout << moveStr << std::endl;
 	ws->send("move " + matchId + ' ' + token + ' ' + moveStr);
 }
