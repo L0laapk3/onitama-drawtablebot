@@ -8,16 +8,23 @@
 // p0 is the maximizer
 template<bool player, bool root>
 std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft) {
-	if (isWinInOne<player>()) {
+	auto permutation = CARDS_PERMUTATIONS[cardI];
+	const std::array<const U32*, 2> reverseMoveBoards{
+		&(cards.moveBoards[permutation.playerCards[player][0]][!player])[0],
+		&(cards.moveBoards[permutation.playerCards[player][1]][!player])[0],
+	};
+
+	if (isWinInOne<player>(reverseMoveBoards)) {
 		Board board = *this;
-		board.doWinInOne<player>();
+		board.doWinInOne<player>(reverseMoveBoards);
+		board.assertValid(true);
 		return SearchResult{ SCORE::WIN, board };
 	}
 
 	if (!root && depthLeft <= 0) {
 		Score standing_pat = evaluate<player>();
 		if (standing_pat >= beta)
-			return SearchResult{ beta };
+			return SearchResult{ beta, Board{} };
 		if (standing_pat > alpha)
 			alpha = standing_pat;
 	}

@@ -18,8 +18,8 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const st
 	U8 thisCardI = cardI;
 
 	const std::array<const U32*, 2> moveBoard_cards{
-		&cards.moveBoards[permutation.playerCards[player][0]][player][0],
-		&cards.moveBoards[permutation.playerCards[player][1]][player][0],
+		&(cards.moveBoards[permutation.playerCards[player][0]][player])[0],
+		&(cards.moveBoards[permutation.playerCards[player][1]][player])[0],
 	};
 
 	bool cont = true;
@@ -56,8 +56,13 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const st
 
 					cardI = CARDS_SWAP[thisCardI][player][i];
 
+					assertValid();
+
+					Board beforeBoard2 = *this;
 					if (!f) std::unreachable();
 					cont = f();
+					assert(beforeBoard2 == *this);
+
 					if (!cont)
 						break;
 				} else

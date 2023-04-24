@@ -143,11 +143,13 @@ Connection::LoadResult Connection::load() {
 			}
 		});
 		if (boardStr.size()) {
+			Board board = parseBoard(boardStr, player);
+			board.checkValid();
 			return {
 				.player = player,
 				.myTurn = myTurn,
 				.cards = parseCards(cards, player),
-				.board = parseBoard(boardStr, player),
+				.board = board,
 			};
 		}
 	}
@@ -172,6 +174,7 @@ void Connection::waitTurn(Game& game) {
 		});
 	}
 	game.board = parseBoard(boardStr, game.player);
+	game.board.checkValid();
 	delete game.cards;
 	game.cards = new CardsInfo(parseCards(cards, game.player));
 }

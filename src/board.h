@@ -30,27 +30,29 @@ public:
 	static Board create(const CardsInfo& cards, std::array<U32, 2> p = { 0b11111'00000'00000'00000'00000, 0b00000'00000'00000'00000'11111 }, std::array<U32, 2> k = { 0b00100'00000'00000'00000'00000, 0b00000'00000'00000'00000'00100 });
 	void print() const;
 	Board invert() const;
+	void checkValid(bool isWon = false) const;
+	void assertValid(bool isWon = false) const;
 	bool operator==(const Board& other) const;
 
 	// boardWin.hpp
-	static constexpr std::array<U32, 2> TEMPLE = { 22, 2 };
-	static U32 isKingAttackedBy(U32 bbk, U32 bbp);
+	static constexpr std::array<U32, 2> TEMPLE = { 2, 22 };
+	static U32 isKingAttackedBy(const std::array<const U32*, 2>& reverseMoveBoards, U32 bbk, U32 bbp);
 	template <bool player>
-	U32 isKingAttacked(U32 bbk) const;
+	U32 isKingAttacked(const std::array<const U32*, 2>& reverseMoveBoards, U32 bbk) const;
 	template <bool player>
-	bool isTempleKingInRange() const;
+	bool isTempleKingInRange(const std::array<const U32*, 2>& reverseMoveBoards) const;
 	template <bool player>
 	bool isTempleFree() const;
 
 	template <bool player>
-	bool isTempleWinInOne() const;
+	bool isTempleWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const;
 	template <bool player>
-	U32 isTakeWinInOne() const;
+	U32 isTakeWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const;
 	template <bool player>
-	bool isWinInOne() const;
+	bool isWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const;
 
 	template <bool player>
-	void doWinInOne();
+	void doWinInOne(const std::array<const U32*, 2>& reverseMoveBoards);
 
 	// boardEval.hpp
 	template <bool player>

@@ -9,15 +9,23 @@
 
 int main(int argc, char** argv) {
 
-	if (0) {
+	if (1) {
 		auto& cards = CARDS_PERFT;
 
 		Board board = Board::create(cards);
+		board.p[1] = board.k[1];
 
-		auto result = board.search<0>(cards, 9);
-		std::cout << "Result: " << result.score << std::endl;
-		result.next.print();
-		board = result.next;
+		while (true) {
+			board.print();
+			auto result = board.search<0>(cards, 1);
+			std::cout << "Result: " << result.score << std::endl;
+			board = result.next;
+
+			board.print();
+			result = board.search<1>(cards, 1);
+			std::cout << "Result: " << result.score << std::endl;
+			board = result.next;
+		}
 		return 0;
 	}
 
@@ -35,7 +43,7 @@ int main(int argc, char** argv) {
 		game.board.print();
 		if (game.myTurn) {
 			// auto bestMove = game.searchTime(game.board, 10000, 2);
-			auto result = game.board.search<0>(*game.cards, 9);
+			auto result = game.board.search<0>(*game.cards, 1);
 			std::cout << "Result: " << result.score << std::endl;
 			result.next.print();
 			conn.submitMove(game, result.next, 0);
