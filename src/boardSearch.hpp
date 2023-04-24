@@ -7,16 +7,14 @@
 // negamax implementation
 // p0 is the maximizer
 template<bool player, bool root>
-std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft) {
-	auto permutation = CARDS_PERMUTATIONS[cardI];
-	const std::array<const U32*, 2> reverseMoveBoards{
-		&(cards.moveBoards[permutation.playerCards[player][0]][!player])[0],
-		&(cards.moveBoards[permutation.playerCards[player][1]][!player])[0],
-	};
+std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& moveBoards, Score alpha, Score beta, Depth depthLeft) {
 
-	if (isWinInOne<player>(reverseMoveBoards)) {
+	U8 thisCardI = cardI;
+	const auto& moveList = moveBoards[CARDS_HAND[player][cardI]];
+
+	if (isWinInOne<player>(moveList)) {
 		Board board = *this;
-		board.doWinInOne<player>(reverseMoveBoards);
+		board.doWinInOne<player>(moveList);
 		board.assertValid(true);
 		return SearchResult{ SCORE::WIN, board };
 	}
@@ -30,8 +28,8 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 	}
 
 	Board nextBoard;
-	iterateMoves<player>(cards, depthLeft <= 0, [&]() {
-		Score score = -search<!player>(cards, -beta, -alpha, depthLeft - 1);
+	iterateMoves<player>(moveBoards, depthLeft <= 0, [&]() {
+		Score score = -search<!player>(moveBoards, -beta, -alpha, depthLeft - 1);
 		if (root && score > alpha)
 			nextBoard = *this;
 		if (score >= beta) {
@@ -49,6 +47,6 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 
 
 template<bool player>
-SearchResult Board::search(const CardsInfo& cards, Depth depth) {
-	return search<player, true>(cards, SCORE::LOSE, SCORE::WIN, depth);
+SearchResult Board::search(const MoveBoardSet& moveBoards, Depth depth) {
+	return search<player, true>(moveBoards, SCORE::LOSE, SCORE::WIN, depth);
 }

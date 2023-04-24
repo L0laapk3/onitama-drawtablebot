@@ -27,7 +27,7 @@ public:
 
 
 	// boardUtil.cpp
-	static Board create(const CardsInfo& cards, std::array<U32, 2> p = { 0b11111'00000'00000'00000'00000, 0b00000'00000'00000'00000'11111 }, std::array<U32, 2> k = { 0b00100'00000'00000'00000'00000, 0b00000'00000'00000'00000'00100 });
+	static Board create(std::array<U32, 2> p = { 0b11111'00000'00000'00000'00000, 0b00000'00000'00000'00000'11111 }, std::array<U32, 2> k = { 0b00100'00000'00000'00000'00000, 0b00000'00000'00000'00000'00100 });
 	void print() const;
 	Board invert() const;
 	void checkValid(bool isWon = false) const;
@@ -36,23 +36,25 @@ public:
 
 	// boardWin.hpp
 	static constexpr std::array<U32, 2> TEMPLE = { 2, 22 };
-	static U32 isKingAttackedBy(const std::array<const U32*, 2>& reverseMoveBoards, U32 bbk, U32 bbp);
+
 	template <bool player>
-	U32 isKingAttacked(const std::array<const U32*, 2>& reverseMoveBoards, U32 bbk) const;
+	static U32 isKingAttackedBy(const MoveBoardList& moveList, U32 bbk, U32 bbp);
 	template <bool player>
-	bool isTempleKingInRange(const std::array<const U32*, 2>& reverseMoveBoards) const;
+	U32 isKingAttacked(const MoveBoardList& moveList, U32 bbk) const;
+	template <bool player>
+	bool isTempleKingInRange(const MoveBoardList& moveList) const;
 	template <bool player>
 	bool isTempleFree() const;
 
 	template <bool player>
-	bool isTempleWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const;
+	bool isTempleWinInOne(const MoveBoardList& moveList) const;
 	template <bool player>
-	U32 isTakeWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const;
+	U32 isTakeWinInOne(const MoveBoardList& moveList) const;
 	template <bool player>
-	bool isWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const;
+	bool isWinInOne(const MoveBoardList& moveList) const;
 
 	template <bool player>
-	void doWinInOne(const std::array<const U32*, 2>& reverseMoveBoards);
+	void doWinInOne(const MoveBoardList& moveList);
 
 	// boardEval.hpp
 	template <bool player>
@@ -62,13 +64,13 @@ public:
 
 	// boardIter.hpp
 	template<bool player>
-	void iterateMoves(const CardsInfo& cards, bool quiesence, const std::function<bool()> f);
+	void iterateMoves(const MoveBoardSet& moveBoards, bool quiesence, const std::function<bool()> f);
 
 	// boardSearch.hpp
 	template<bool player, bool root = false>
-	std::conditional_t<root, SearchResult, Score> search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft);
+	std::conditional_t<root, SearchResult, Score> search(const MoveBoardSet& moveBoards, Score alpha, Score beta, Depth depthLeft);
 	template<bool player>
-	SearchResult search(const CardsInfo& cards, Depth depth);
+	SearchResult search(const MoveBoardSet& moveBoards, Depth depth);
 };
 
 struct SearchResult {

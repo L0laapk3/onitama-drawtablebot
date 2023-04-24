@@ -11,16 +11,11 @@ std::array<U32, 25> moveBoard0, moveBoard1; // TODO
 // assumes p0 is to move
 // assumes the board is not a win in 1
 template<bool player>
-inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const std::function<bool()> f) {
+inline void Board::iterateMoves(const MoveBoardSet& moveBoards, bool quiesence, const std::function<bool()> f) {
 	Board beforeBoard = *this;
 
-	auto permutation = CARDS_PERMUTATIONS[cardI];
 	U8 thisCardI = cardI;
-
-	const std::array<const U32*, 2> moveBoard_cards{
-		&(cards.moveBoards[permutation.playerCards[player][0]][player])[0],
-		&(cards.moveBoards[permutation.playerCards[player][1]][player])[0],
-	};
+	const auto& moveList = moveBoards[CARDS_HAND[player][cardI]];
 
 	bool cont = true;
 	U32 sourceBits = p[player];
@@ -28,8 +23,9 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const st
 		U32 sourcePiece = sourceBits & -sourceBits;
 		sourceBits &= sourceBits - 1;
 		U32 sourceIndex = _tzcnt_u32(sourcePiece);
+		U32 landBits0 = moveList[sourceIndex].flip[player].cards[0];
+		U32 landBits  = moveList[sourceIndex].flip[player].cards[1] || landBits0;
 
-		U32 landBits = moveBoard_cards[0][sourceIndex] | moveBoard_cards[1][sourceIndex];
 		landBits &= ~p[player];
 		if (quiesence)
 			landBits &= p[!player];
@@ -52,7 +48,7 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const st
 			bool other = false, stop = false;
 			#pragma unroll
 			for (int i = 0; i < 2; i++) {
-				if (other || (landPiece & moveBoard_cards[i][sourceIndex])) {
+				if (other || (landPiece & landBits0)) {
 
 					cardI = CARDS_SWAP[thisCardI][player][i];
 

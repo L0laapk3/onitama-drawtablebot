@@ -11,9 +11,9 @@
 
 
 template <bool player>
-bool inline Board::isTempleKingInRange(const std::array<const U32*, 2>& reverseMoveBoards) const {
+bool inline Board::isTempleKingInRange(const MoveBoardList& moveList) const {
 	// player king can move to temple
-	return (reverseMoveBoards[0][TEMPLE[player]] | reverseMoveBoards[1][TEMPLE[player]]) & k[player];
+	return (moveList[TEMPLE[player]].flip[!player].cards[0] | moveList[TEMPLE[player]].flip[!player].cards[1]) & k[player];
 }
 
 
@@ -25,55 +25,56 @@ bool inline Board::isTempleFree() const {
 
 
 template <bool player>
-bool inline Board::isTempleWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const {
-	return isTempleKingInRange<player>(reverseMoveBoards) && isTempleFree<player>();
+bool inline Board::isTempleWinInOne(const MoveBoardList& moveList) const {
+	return isTempleKingInRange<player>(moveList) && isTempleFree<player>();
 }
 
 
-U32 inline Board::isKingAttackedBy(const std::array<const U32*, 2>& reverseMoveBoards, U32 bbk, U32 bbp) {
+template <bool player>
+U32 inline Board::isKingAttackedBy(const MoveBoardList& moveList, U32 bbk, U32 bbp) {
 	U32 pk = _tzcnt_u32(bbk);
-	return (reverseMoveBoards[0][pk] | reverseMoveBoards[1][pk]) & bbp;
+	return (moveList[pk].flip[!player].cards[0] | moveList[pk].flip[!player].cards[1]) & bbp;
 }
 
 // is !player king safe?
 // is player attacking !players king?
 template <bool player>
-U32 inline Board::isKingAttacked(const std::array<const U32*, 2>& reverseMoveBoards, U32 bbk) const {
-	return isKingAttackedBy(reverseMoveBoards, bbk, p[player]);
+U32 inline Board::isKingAttacked(const MoveBoardList& moveList, U32 bbk) const {
+	return isKingAttackedBy<player>(moveList, bbk, p[player]);
 }
 
 
 
 template <bool player>
-U32 inline Board::isTakeWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const {
-	return isKingAttacked<player>(reverseMoveBoards, k[!player]);
+U32 inline Board::isTakeWinInOne(const MoveBoardList& moveList) const {
+	return isKingAttacked<player>(moveList, k[!player]);
 }
 
 template <bool player>
-bool inline Board::isWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) const {
-	if (isTempleWinInOne<player>(reverseMoveBoards))
+bool inline Board::isWinInOne(const MoveBoardList& moveList) const {
+	if (isTempleWinInOne<player>(moveList))
 		return true;
-	return isTakeWinInOne<player>(reverseMoveBoards);
+	return isTakeWinInOne<player>(moveList);
 }
 
 
 
 template <bool player>
-void inline Board::doWinInOne(const std::array<const U32*, 2>& reverseMoveBoards) {
-	assert(isWinInOne<player>(reverseMoveBoards));
+void inline Board::doWinInOne(const MoveBoardList& moveList) {
+	assert(isWinInOne<player>(moveList));
 
 	bool secondCard;
-	if (isTakeWinInOne<player>(reverseMoveBoards)) {
-		U32 attacker = isKingAttacked<player>(reverseMoveBoards, k[!player]);
+	if (isTakeWinInOne<player>(moveList)) {
+		U32 attacker = isKingAttacked<player>(moveList, k[!player]);
 		attacker &= -attacker; // select first piece that can kill king
-		secondCard = reverseMoveBoards[1][_tzcnt_u32(k[!player])] & attacker;
+		secondCard = moveList[_tzcnt_u32(k[!player])].flip[1].cards[1] & attacker;
 		p[player] ^= attacker ^ k[!player];
 		if (attacker & k[player])
 			k[player] = k[!player];
 		p[!player] ^= k[!player];
 		k[!player] = 0;
 	} else {
-		secondCard = reverseMoveBoards[1][TEMPLE[player]] & k[player];
+		secondCard = moveList[TEMPLE[player]].flip[1].cards[1] & k[player];
 		p[player] ^= k[player] ^ (1 << TEMPLE[player]);
 		k[player] = 1 << TEMPLE[player];
 		p[!player] &= ~k[player];

@@ -7,7 +7,7 @@
 
 
 
-Board Board::create(const CardsInfo& cards, std::array<U32, 2> p, std::array<U32, 2> k) {
+Board Board::create(std::array<U32, 2> p, std::array<U32, 2> k) {
 	return Board{ p, k };
 }
 

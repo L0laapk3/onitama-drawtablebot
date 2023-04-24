@@ -174,23 +174,57 @@ constexpr auto combineMoveBoards(const MoveBoard& a, const MoveBoard& b) {
 
 
 typedef std::array<Card, 5> CardSet;
-typedef std::array<MoveBoard, 2> MoveBoardDir;
-typedef std::array<MoveBoardDir, 5> MoveBoardSet;
 
-constexpr auto generateMoveBoardSets(const CardSet& cards) {
+struct HalfPositionLocal { std::array<U32, 2> cards; };          // card0 and card1
+struct PositionLocal { std::array<HalfPositionLocal, 2> flip; }; // forwards and reverses
+typedef std::array<PositionLocal, 25> MoveBoardList;              // 25 position indices
+typedef std::array<MoveBoardList, 10> MoveBoardSet;               // 5*4/2 half card combinations
+
+
+constexpr auto generateMoveBoardSet(const CardSet& cards) {
 	MoveBoardSet moveBoards;
-	for (U64 i = 0; i < 5; i++)
-		moveBoards[i] = {
-			generateMoveBoard<false>(cards[i]),
-			generateMoveBoard<true>(cards[i]),
-		};
+	int cardI = 0;
+	for (int card0 = 0; card0 < 5; card0++)
+		for (int card1 = card0 + 1; card1 < 5; card1++) {
+			auto& moveBoardOpt = moveBoards[cardI];
+
+			auto moveBoard0 = generateMoveBoard<false>(cards[card0]);
+			auto moveBoard1 = generateMoveBoard<false>(cards[card1]);
+			auto moveBoard0r = generateMoveBoard<true>(cards[card0]);
+			auto moveBoard1r = generateMoveBoard<true>(cards[card1]);
+
+			for (int pos = 0; pos < 25; pos++) {
+				moveBoardOpt[pos].flip[0].cards[0] = moveBoard0[pos];
+				moveBoardOpt[pos].flip[0].cards[1] = moveBoard1[pos];
+				moveBoardOpt[pos].flip[1].cards[0] = moveBoard0r[pos];
+				moveBoardOpt[pos].flip[1].cards[1] = moveBoard1r[pos];
+			}
+		}
+
     return moveBoards;
 }
+
+constexpr auto CARDS_HAND = [](){
+	std::array<std::array<U8, 32>, 2> cardsHand{};
+	for (int player = 0; player < 2; player++) {
+		int cardI = 0;
+		for (int card0 = 0; card0 < 5; card0++)
+			for (int card1 = card0 + 1; card1 < 5; card1++) {
+				for (int i = 0; i < 30; i++) {
+					auto perm = CARDS_PERMUTATIONS[i];
+					if (perm.playerCards[player][0] == card0 && perm.playerCards[player][1] == card1)
+						cardsHand[player][i] = cardI;
+				}
+				cardI++;
+			}
+	}
+	return cardsHand;
+}();
 
 
 struct CardsInfo {
 	CardSet cards;
-	MoveBoardSet moveBoards = generateMoveBoardSets(cards);
+	MoveBoardSet moveBoards = generateMoveBoardSet(cards);
 };
 
 
