@@ -76,5 +76,7 @@ public:
 struct SearchResult {
 	Score score;
 	Board board;
+	bool foundMove = true;
+	bool winningMove = false;
 	operator Score() const { return score; };
 };

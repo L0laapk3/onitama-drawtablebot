@@ -9,22 +9,21 @@
 
 int main(int argc, char** argv) {
 
-	if (1) {
+	if (0) {
 		auto& cards = CARDS_PERFT;
 
 		Board board = Board::create();
 		board.p[1] = board.k[1];
 
 		while (true) {
-			board.print();
-			auto result = board.search<0>(cards.moveBoards, 5);
-			std::cout << "Result: " << result.score << std::endl;
-			board = result.board;
-
-			board.print();
-			result = board.search<1>(cards.moveBoards, 5);
-			std::cout << "Result: " << result.score << std::endl;
-			board = result.board;
+			for (int player = 0; player < 2; player++) {
+				board.print();
+				const auto& result = !player ? board.search<0>(cards.moveBoards, 5) : board.search<1>(cards.moveBoards, 5);
+				std::cout << "Result: " << result.score << std::endl;
+				board = result.board;
+				if (result.winningMove)
+					return 0;
+			}
 		}
 		return 0;
 	}

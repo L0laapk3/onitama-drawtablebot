@@ -17,7 +17,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& 
 		Board board = *this;
 		board.doWinInOne<player>(moveList);
 		board.assertValid(true);
-		return SearchResult{ SCORE::WIN, board };
+		return SearchResult{ SCORE::WIN, board, true, true };
 	}
 
 	if (!root && depthLeft <= 0) {
@@ -34,7 +34,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& 
 		Board beforeBoard = *this;
 		Score score = -search<!player>(moveBoards, -beta, -alpha, depthLeft - 1);
 
-		score -= - (score >= 0 ? 1 : -1); // move score closer to zero for every move
+		score -= score >= 0 ? 1 : -1; // move score closer to zero for every move
 
 		if (score > alpha)
 			nextBoard = *this;
@@ -47,7 +47,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& 
 		return true;
 	});
 
-	return SearchResult{ alpha, nextBoard };
+	return SearchResult{ alpha, nextBoard, nextBoard.p[0] != 0 };
 }
 
 
@@ -55,7 +55,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& 
 template<bool player>
 SearchResult Board::search(const MoveBoardSet& moveBoards, Depth depth) {
 	auto result = search<player, true>(moveBoards, SCORE::LOSE, SCORE::WIN, depth);
-	if (!result.board.p[0])
+	if (!result.foundMove)
 		std::cout << "no moves found within window.." << std::endl;
 	return result;
 }
