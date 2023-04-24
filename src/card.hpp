@@ -186,7 +186,7 @@ constexpr auto generateMoveBoardSet(const CardSet& cards) {
 	int cardI = 0;
 	for (int card0 = 0; card0 < 5; card0++)
 		for (int card1 = card0 + 1; card1 < 5; card1++) {
-			auto& moveBoardOpt = moveBoards[cardI];
+			auto& moveBoardOpt = moveBoards[cardI++];
 
 			auto moveBoard0 = generateMoveBoard<false>(cards[card0]);
 			auto moveBoard1 = generateMoveBoard<false>(cards[card1]);
@@ -205,7 +205,7 @@ constexpr auto generateMoveBoardSet(const CardSet& cards) {
 }
 
 constexpr auto CARDS_HAND = [](){
-	std::array<std::array<U8, 32>, 2> cardsHand{};
+	std::array<std::array<U8, 32>, 2> cardsHand{ (U8)-1 };
 	for (int player = 0; player < 2; player++) {
 		int cardI = 0;
 		for (int card0 = 0; card0 < 5; card0++)

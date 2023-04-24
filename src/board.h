@@ -23,7 +23,7 @@ class Board {
 public:
     std::array<U32, 2> p;
     std::array<U32, 2> k;
-	U8 cardI;
+	U8 cardI = 10;
 
 
 	// boardUtil.cpp
@@ -75,6 +75,6 @@ public:
 
 struct SearchResult {
 	Score score;
-	Board next;
+	Board board;
 	operator Score() const { return score; };
 };

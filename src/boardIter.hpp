@@ -6,8 +6,6 @@
 
 
 
-std::array<U32, 25> moveBoard0, moveBoard1; // TODO
-
 // assumes p0 is to move
 // assumes the board is not a win in 1
 template<bool player>
@@ -24,7 +22,7 @@ inline void Board::iterateMoves(const MoveBoardSet& moveBoards, bool quiesence, 
 		sourceBits &= sourceBits - 1;
 		U32 sourceIndex = _tzcnt_u32(sourcePiece);
 		U32 landBits0 = moveList[sourceIndex].flip[player].cards[0];
-		U32 landBits  = moveList[sourceIndex].flip[player].cards[1] || landBits0;
+		U32 landBits  = moveList[sourceIndex].flip[player].cards[1] | landBits0;
 
 		landBits &= ~p[player];
 		if (quiesence)
@@ -72,8 +70,10 @@ inline void Board::iterateMoves(const MoveBoardSet& moveBoards, bool quiesence, 
 
 		p[player] |= sourcePiece;
 		k[player] |= sourceKing;
-		cardI = thisCardI;
+
+		assertValid();
 	} while (sourceBits && cont);
+	cardI = thisCardI;
 
 	assert(beforeBoard == *this);
 }

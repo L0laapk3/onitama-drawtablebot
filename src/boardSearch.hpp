@@ -11,6 +11,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& 
 
 	U8 thisCardI = cardI;
 	const auto& moveList = moveBoards[CARDS_HAND[player][cardI]];
+	assertValid();
 
 	if (isWinInOne<player>(moveList)) {
 		Board board = *this;
@@ -28,9 +29,14 @@ std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& 
 	}
 
 	Board nextBoard;
+	nextBoard.p[0] = 0;
 	iterateMoves<player>(moveBoards, depthLeft <= 0, [&]() {
+		Board beforeBoard = *this;
 		Score score = -search<!player>(moveBoards, -beta, -alpha, depthLeft - 1);
-		if (root && score > alpha)
+
+		score -= - (score >= 0 ? 1 : -1); // move score closer to zero for every move
+
+		if (score > alpha)
 			nextBoard = *this;
 		if (score >= beta) {
 			alpha = beta;
@@ -48,5 +54,8 @@ std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& 
 
 template<bool player>
 SearchResult Board::search(const MoveBoardSet& moveBoards, Depth depth) {
-	return search<player, true>(moveBoards, SCORE::LOSE, SCORE::WIN, depth);
+	auto result = search<player, true>(moveBoards, SCORE::LOSE, SCORE::WIN, depth);
+	if (!result.board.p[0])
+		std::cout << "no moves found within window.." << std::endl;
+	return result;
 }

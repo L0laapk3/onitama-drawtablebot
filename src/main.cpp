@@ -17,14 +17,14 @@ int main(int argc, char** argv) {
 
 		while (true) {
 			board.print();
-			auto result = board.search<0>(cards.moveBoards, 1);
+			auto result = board.search<0>(cards.moveBoards, 5);
 			std::cout << "Result: " << result.score << std::endl;
-			board = result.next;
+			board = result.board;
 
 			board.print();
-			result = board.search<1>(cards.moveBoards, 1);
+			result = board.search<1>(cards.moveBoards, 5);
 			std::cout << "Result: " << result.score << std::endl;
-			board = result.next;
+			board = result.board;
 		}
 		return 0;
 	}
@@ -45,8 +45,8 @@ int main(int argc, char** argv) {
 			// auto bestMove = game.searchTime(game.board, 10000, 2);
 			auto result = game.board.search<0>(game.cards->moveBoards, 1);
 			std::cout << "Result: " << result.score << std::endl;
-			result.next.print();
-			conn.submitMove(game, result.next, 0);
+			result.board.print();
+			conn.submitMove(game, result.board, 0);
 		}
 
 		conn.waitTurn(game);

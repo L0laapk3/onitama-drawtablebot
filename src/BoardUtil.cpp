@@ -17,7 +17,7 @@ void Board::checkValid(bool isWon) const {
 		if (!result) {
 			std::cout << "Invalid board!" << std::endl;
 			print();
-		assert(false);
+			assert(false);
 		}
 	};
 
