@@ -49,6 +49,7 @@ int main(int argc, char** argv) {
 			// auto bestMove = game.searchTime(game.board, 10000, 2);
 			auto result = game.board.searchTime(*game.cards, 0, 1000);
 			std::cout << "Result: " << result.score << std::endl;
+			result.board.print(*game.cards);
 			conn.submitMove(game, result.board, 0);
 		}
 

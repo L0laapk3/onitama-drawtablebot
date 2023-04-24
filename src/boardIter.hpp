@@ -21,8 +21,8 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const st
 		U32 sourcePiece = sourceBits & -sourceBits;
 		sourceBits &= sourceBits - 1;
 		U32 sourceIndex = _tzcnt_u32(sourcePiece);
-		U32 landBits0 = moveList[sourceIndex].flip[player].cards[0];
-		U32 landBits  = moveList[sourceIndex].flip[player].cards[1] | landBits0;
+		auto& landBitsCards = moveList[sourceIndex].flip[player].cards;
+		U32 landBits = landBitsCards[0] | landBitsCards[1];
 
 		landBits &= ~p[player];
 		if (quiesence)
@@ -46,7 +46,7 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const st
 			bool other = false, stop = false;
 			#pragma unroll
 			for (int i = 0; i < 2; i++) {
-				if (other || (landPiece & landBits0)) {
+				if (other || (landPiece & landBitsCards[i])) {
 
 					cardI = CARDS_SWAP[thisCardI][player][i];
 
