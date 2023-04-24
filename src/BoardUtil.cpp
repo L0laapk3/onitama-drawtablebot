@@ -12,16 +12,17 @@ Board Board::create(const CardsInfo& cards, std::array<U32, 2> p, std::array<U32
 
 
 void Board::print() const {
-	for (int r = 5; r-- > 0;) {
-		for (int c = 0; c < 5; c++) {
+	auto bi = invert();
+	for (int r = 0; r < 5; r++) {
+		for (int c = 5; c --> 0;) {
 			const int mask = 1 << (5 * r + c);
 			if (p[0] & mask) {
 				if ((p[1] | k[1]) & mask)    std::cout << '?'; // invalid
-				else if (k[0] & mask)        std::cout << '0';
-				else                         std::cout << 'o';
-			} else if (p[1] & mask) {
-				if (k[1] & mask)             std::cout << 'X';
+				else if (k[0] & mask)        std::cout << 'X';
 				else                         std::cout << '+';
+			} else if (p[1] & mask) {
+				if (k[1] & mask)             std::cout << 'O';
+				else                         std::cout << 'o';
 			} else if ((k[0] | k[1]) & mask) std::cout << 'K'; // invalid
 			else                             std::cout << '.';
 		}

@@ -146,7 +146,7 @@ Connection::LoadResult Connection::load() {
 			return {
 				.myTurn = myTurn,
 				.cards = parseCards(cards, player),
-				.board = parseBoard(boardStr, !player),
+				.board = parseBoard(boardStr, player),
 			};
 			// loadedBoard = Board::fromString(boardStr, !currentTurn, player);
 			// return CardBoard::fetchGameCards(cards, player);
@@ -172,7 +172,7 @@ void Connection::waitTurn(Game& game) {
 			ended = getString(message, "gameState") == "ended";
 		});
 	}
-	game.board = parseBoard(boardStr, !player);
+	game.board = parseBoard(boardStr, player);
 	delete game.cards;
 	game.cards = new CardsInfo(parseCards(cards, player));
 }
@@ -182,12 +182,12 @@ std::string indexToPos(U32 i, bool flipped) {
 	return (flipped ? "edcba" : "abcde")[i % 5] + std::to_string((flipped ? 24 - i : i) / 5 + 1);
 }
 
-void Connection::submitMove(Game& game, const Board& board) {
-	U32 from = _tzcnt_u32(game.board.p[0] & ~board.p[0]);
-	U32 to   = _tzcnt_u32(board.p[0] & ~game.board.p[0]);
+void Connection::submitMove(Game& game, const Board& board, bool flipped) {
+	U32 from = _tzcnt_u32(game.board.p[flipped] & ~board.p[flipped]);
+	U32 to   = _tzcnt_u32(board.p[flipped] & ~game.board.p[flipped]);
 	auto permutation = CARDS_PERMUTATIONS[board.cardI];
 	const Card& card = game.cards->cards[permutation.sideCard];
-	const std::string moveStr = std::string(card.name) + ' ' + indexToPos(from, player) + indexToPos(to, player);
+	const std::string moveStr = std::string(card.name) + ' ' + indexToPos(from, player != flipped) + indexToPos(to, player != flipped);
 	std::cout << moveStr << std::endl;
 	ws->send("move " + matchId + ' ' + token + ' ' + moveStr);
 }

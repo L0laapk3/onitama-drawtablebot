@@ -29,7 +29,7 @@ public:
 	};
 	LoadResult load();
 	void waitTurn(Game& game);
-	void submitMove(Game& game, const Board& board);
+	void submitMove(Game& game, const Board& board, bool flipped);
 
 	std::string matchId;
 	std::string token;

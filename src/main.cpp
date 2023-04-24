@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
 			auto result = game.board.search<0>(*game.cards, 9);
 			std::cout << "Result: " << result.score << std::endl;
 			result.next.print();
-			conn.submitMove(game, result.next);
+			conn.submitMove(game, result.next, 0);
 		}
 
 		conn.waitTurn(game);
