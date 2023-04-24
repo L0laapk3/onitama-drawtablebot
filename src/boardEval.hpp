@@ -13,7 +13,7 @@ constexpr Score MUL_PIECE_ADVANTAGE    = 1000 * MUL_POSITION_ADVANTAGE;
 constexpr std::array<Score, 33> pawnScores{
 	0, 1, 2, 1, 0,
 	2, 4, 7, 4, 2,
-	4, 7, 11, 7, 4,
+	4, 8, 11, 8, 4,
 	2, 4, 7, 4, 2,
 	0, 1, 2, 1, 0,
 };

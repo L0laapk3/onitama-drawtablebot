@@ -54,8 +54,5 @@ std::conditional_t<root, SearchResult, Score> Board::search(const MoveBoardSet& 
 
 template<bool player>
 SearchResult Board::search(const MoveBoardSet& moveBoards, Depth depth) {
-	auto result = search<player, true>(moveBoards, SCORE::LOSE, SCORE::WIN, depth);
-	if (!result.foundMove)
-		std::cout << "no moves found within window.." << std::endl;
-	return result;
+	return search<player, true>(moveBoards, SCORE::LOSE, SCORE::WIN, depth);
 }

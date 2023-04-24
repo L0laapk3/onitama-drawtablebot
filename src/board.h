@@ -27,7 +27,7 @@ public:
 
 
 	// boardUtil.cpp
-	static Board create(std::array<U32, 2> p = { 0b11111'00000'00000'00000'00000, 0b00000'00000'00000'00000'11111 }, std::array<U32, 2> k = { 0b00100'00000'00000'00000'00000, 0b00000'00000'00000'00000'00100 });
+	static Board create(std::array<U32, 2> p = { 0b00000'00000'00000'00000'11111, 0b11111'00000'00000'00000'00000 }, std::array<U32, 2> k = { 0b00000'00000'00000'00000'00100, 0b00100'00000'00000'00000'00000 });
 	void print() const;
 	Board invert() const;
 	void checkValid(bool isWon = false) const;
@@ -35,7 +35,7 @@ public:
 	bool operator==(const Board& other) const;
 
 	// boardWin.hpp
-	static constexpr std::array<U32, 2> TEMPLE = { 2, 22 };
+	static constexpr std::array<U32, 2> TEMPLE = { 22, 2 };
 
 	template <bool player>
 	static U32 isKingAttackedBy(const MoveBoardList& moveList, U32 bbk, U32 bbp);

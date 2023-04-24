@@ -174,7 +174,7 @@ void Connection::waitTurn(Game& game) {
 		});
 	}
 	game.board = parseBoard(boardStr, game.player);
-	game.board.checkValid();
+	game.board.checkValid(game.ended);
 	delete game.cards;
 	game.cards = new CardsInfo(parseCards(cards, game.player));
 }
