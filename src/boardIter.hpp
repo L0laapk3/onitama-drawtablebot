@@ -1,6 +1,6 @@
 #include "board.h"
+#include "util.h"
 
-#include <cassert>
 #include <immintrin.h>
 #include <x86intrin.h>
 
@@ -55,7 +55,7 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 
 						Board beforeBoard2 = *this;
 						cont = f();
-						assert(beforeBoard2 == *this);
+						assume(beforeBoard2 == *this);
 
 						if (!cont)
 							break;
@@ -80,5 +80,5 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 
 	cardI = thisCardI;
 
-	assert(beforeBoard == *this);
+	assume(*this == beforeBoard);
 }

@@ -9,6 +9,7 @@
 // p0 is the maximizer
 template<bool player, bool root>
 std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft) {
+	Board beforeBoard = *this;
 
 	U8 thisCardI = cardI;
 	const auto& moveList = cards.moveBoards[CARDS_HAND[player][cardI]];
@@ -47,6 +48,8 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 			alpha = score;
 		return true;
 	});
+
+	assume(*this == beforeBoard);
 
 	return SearchResult{ alpha, nextBoard, nextBoard.p[0] != 0 };
 }
