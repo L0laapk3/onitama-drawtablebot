@@ -68,15 +68,17 @@ public:
 	Score evaluateHalf() const;
 
 	// boardIter.hpp
-	template<bool player>
-	void iterateMoves(const CardsInfo& cards, bool quiesence, const std::function<bool()> f);
+	template<bool player, typename Callable>
+	void iterateMoves(const CardsInfo& cards, bool quiesence, const Callable f);
 
 	// boardSearch.hpp
 	template<bool player, bool root = false>
 	std::conditional_t<root, SearchResult, Score> search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft);
-	SearchResult search(const CardsInfo& cards, bool player, Depth depth, Score alpha = SCORE::LOSE, Score beta = SCORE::WIN);
-	SearchTimeResult searchTime(const CardsInfo& cards, bool player, int timeMs, Score alpha = SCORE::LOSE, Score beta = SCORE::WIN);
-	// SearchTimeResult searchTimeWithPanic(const CardsInfo& cards, bool player, int timeMs, SearchTimeResult& lastResult);
+
+	// boardSearchTools.cpp
+	SearchResult search(const CardsInfo& cards, Depth depth, bool player = 0, Score alpha = SCORE::LOSE, Score beta = SCORE::WIN, bool print = true);
+	SearchTimeResult searchTime(const CardsInfo& cards, S64 timeMs, bool player = 0, Score alpha = SCORE::LOSE, Score beta = SCORE::WIN);
+	// SearchTimeResult searchTimeWithPanic(const CardsInfo& cards, S64 timeMs, bool player = 0, SearchTimeResult& lastResult);
 };
 
 struct SearchResult {
@@ -85,8 +87,8 @@ struct SearchResult {
 	bool foundMove = true;
 	bool winningMove = false;
 	operator Score() const { return score; };
+	S64 durationUs;
 };
 struct SearchTimeResult : public SearchResult {
 	Depth depth;
-	S64 timeMs;
 };

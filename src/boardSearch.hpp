@@ -3,7 +3,6 @@
 #include "boardIter.hpp"
 #include "boardEval.hpp"
 
-#include <chrono>
 
 
 // negamax implementation
@@ -51,47 +50,3 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 
 	return SearchResult{ alpha, nextBoard, nextBoard.p[0] != 0 };
 }
-
-
-
-
-
-SearchResult Board::search(const CardsInfo& cards, bool player, Depth depth, Score alpha, Score beta) {
-	if (player)
-		return search<1, true>(cards, alpha, beta, depth);
-	return     search<0, true>(cards, alpha, beta, depth);
-}
-
-
-
-SearchTimeResult Board::searchTime(const CardsInfo& cards, bool player, int timeMs, Score alpha, Score beta) {
-	SearchResult result;
-	Depth depth = 0;
-
-	S64 duration, lastDuration = 1;
-	auto start = std::chrono::high_resolution_clock::now();
-	while (true) {
-		depth++;
-
-		result = search(cards, player, depth, alpha, beta);
-		auto end = std::chrono::high_resolution_clock::now();
-		duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-		if (result.winningMove)
-			break;
-
-		int predictedTime = duration * duration / std::max<int>(lastDuration, 1);
-		lastDuration = duration;
-		if (predictedTime > timeMs)
-			break;
-	}
-	printf("Depth: %d, Time: %lldms\n", depth, duration);
-	return {
-		result,
-		depth,
-		duration,
-	};
-}
-
-
-constexpr Score PANIC_TRESHOLD = MUL_POSITION_ADVANTAGE / 2;
-constexpr int PANIC_TIME_MULTIPLIER = 8;
