@@ -16,7 +16,7 @@ enum SCORE : int {
 	DRAW = 0,
 };
 
-typedef int Depth;
+typedef S16 Depth;
 
 struct SearchResult;
 struct SearchTimeResult;
