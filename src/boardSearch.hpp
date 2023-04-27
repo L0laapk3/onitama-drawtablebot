@@ -2,24 +2,25 @@
 #include "boardWin.hpp"
 #include "boardIter.hpp"
 #include "boardEval.hpp"
+#include "game.h"
 
 
 
 // negamax implementation
 // p0 is the maximizer
 template<bool player, bool root, bool trackDistance>
-std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft) {
+std::conditional_t<root, SearchResult, Score> Board::search(const Game& game, Score alpha, Score beta, Depth depthLeft) {
 	Board beforeBoard = *this;
 
 	U8 thisCardI = cardI;
-	const auto& moveList = cards.moveBoards[CARDS_HAND[player][cardI]];
-	assertValid(cards, player);
+	const auto& moveList = game.cards->moveBoards[CARDS_HAND[player][cardI]];
+	assertValid(*game.cards, player);
 
 	if (isWinInOne<player>(moveList)) {
 		Board board = *this;
 		if (root) {
 			board.doWinInOne<player>(moveList);
-			board.assertValid(cards, !player, true);
+			board.assertValid(*game.cards, !player, true);
 		}
 		return SearchResult{ SCORE::WIN, board, true, true };
 	}
@@ -32,14 +33,16 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 			alpha = standing_pat;
 	}
 
+	// auto ttEntry =
+
 	Board nextBoard;
 	bool foundMove = false;
 	Score bestScore = SCORE::MIN;
-	iterateMoves<player>(cards, !root && depthLeft <= 0, [&]() {
+	iterateMoves<player>(game, !root && depthLeft <= 0, [&]() {
 		foundMove = true;
 		Board beforeBoard = *this;
-		Score score = -search<!player, false, trackDistance>(cards, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
-		// TODO: figure out if trackDistance like this ruins the benefits of ab
+		Score score = -search<!player, false, trackDistance>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
+		// trackDistance: widen the search window so we can subtract one again to penalize for distance
 
 		if (trackDistance) // move score closer to zero for every move
 			score -= score >= 0 ? 1 : -1;

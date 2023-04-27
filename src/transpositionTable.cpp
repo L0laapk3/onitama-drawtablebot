@@ -2,8 +2,8 @@
 
 
 
-constexpr U64 SIZE_REPLACE_ALWAYS = 1ULL << 24; // 16MB, half of L3
-constexpr U64 SIZE_DEPTH_PREFERRED = 1ULL << 32; // 4GB
+constexpr U64 SIZE_REPLACE_ALWAYS  = (1ULL << 24) / sizeof(Transposition); // 16MB, half of L3
+constexpr U64 SIZE_DEPTH_PREFERRED = (1ULL << 32) / sizeof(Transposition); // 4GB
 
 
 TranspositionTableWrapper::TranspositionTableWrapper() {
@@ -14,7 +14,9 @@ TranspositionTableWrapper::TranspositionTableWrapper() {
 Transposition TranspositionTableWrapper::get(U64 hash) {
 	if (TableReplaceAlways [hash & (SIZE_REPLACE_ALWAYS  - 1)].hash == hash) return TableReplaceAlways [hash & (SIZE_REPLACE_ALWAYS  - 1)];
 	if (TableDepthPreferred[hash & (SIZE_DEPTH_PREFERRED - 1)].hash == hash) return TableDepthPreferred[hash & (SIZE_DEPTH_PREFERRED - 1)];
-	return Transposition{};
+	Transposition blank;
+	blank.hash = 0;
+	return blank;
 }
 
 void TranspositionTableWrapper::put(U64 hash, Transposition& transposition) {

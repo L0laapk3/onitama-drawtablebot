@@ -10,13 +10,13 @@
 // assumes p0 is to move
 // assumes the board is not a win in 1
 template<bool player, typename Callable>
-inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Callable f) {
+inline void Board::iterateMoves(const Game& game, bool quiesence, const Callable f) {
 	Board beforeBoard = *this;
 
 	hash ^= ZOBRIST.turn;
 
 	U8 thisCardI = cardI;
-	const auto& moveList = cards.moveBoards[CARDS_HAND[player][cardI]];
+	const auto& moveList = game.cards->moveBoards[CARDS_HAND[player][cardI]];
 
 	bool cont = true;
 	#pragma unroll
@@ -59,11 +59,11 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 						cardI = CARDS_SWAP[thisCardI][player][i];
 						hash ^= ZOBRIST.moves[thisCardI][player][i];
 
-						assertValid(cards, !player);
+						assertValid(*game.cards, !player);
 						Board beforeBoard2 = *this;
 						cont = f();
 						assume(*this == beforeBoard2);
-						assertValid(cards, !player);
+						assertValid(*game.cards, !player);
 
 						hash ^= ZOBRIST.moves[thisCardI][player][i];
 
@@ -89,7 +89,7 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 #ifndef NDEBUG
 			Board tmpBoard = *this;
 			tmpBoard.cardI = thisCardI;
-			tmpBoard.assertValid(cards, !player);
+			tmpBoard.assertValid(*game.cards, !player);
 #endif
 		} while (sourceBits && cont);
 		if (!cont || quiesence)

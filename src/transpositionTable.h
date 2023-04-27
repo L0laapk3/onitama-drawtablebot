@@ -5,13 +5,20 @@
 
 #include <array>
 
+enum NodeType : U8 {
+	EXACT      = 0,
+	LOWERBOUND = 1,
+	UPPERBOUND = 2,
+};
 
 struct Transposition {
 	U64 hash;
 	Score score;
 	Depth depth;
-	// TODO bestMove
-	// TODO node type
+	U8 fromBit    : 6;
+	U8 secondCard : 1;
+	U8 toBit      : 6;
+	NodeType type : 2;
 };
 
 

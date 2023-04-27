@@ -17,16 +17,16 @@ void narrowSearchForWin(ScoreParsed& score, Score& alpha, Score& beta) {
 }
 
 
-SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, bool searchWin, Score alpha, Score beta, bool print) {
-	assertValid(cards, player);
+SearchResult Board::search(const Game& game, Depth depth, bool player, bool searchWin, Score alpha, Score beta, bool print) {
+	assertValid(*game.cards, player);
 	SearchResult result;
 	result.durationUs = 0;
 	if (!searchWin) {
 		auto start = std::chrono::high_resolution_clock::now();
 		if (player)
-			result = search<1, true>(cards, alpha, beta, depth);
+			result = search<1, true>(game, alpha, beta, depth);
 		else
-			result = search<0, true>(cards, alpha, beta, depth);
+			result = search<0, true>(game, alpha, beta, depth);
 		auto end = std::chrono::high_resolution_clock::now();
 		result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
@@ -42,9 +42,9 @@ SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, boo
 		auto prevDuration = result.durationUs;
 		auto start = std::chrono::high_resolution_clock::now();
 		if (player)
-			result = search<1, true, true>(cards, alpha, beta, depth);
+			result = search<1, true, true>(game, alpha, beta, depth);
 		else
-			result = search<0, true, true>(cards, alpha, beta, depth);
+			result = search<0, true, true>(game, alpha, beta, depth);
 		auto end = std::chrono::high_resolution_clock::now();
 		result.durationUs = prevDuration + std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	}
@@ -55,14 +55,14 @@ SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, boo
 	if (!result.foundMove)
 		std::cout << "no move found" << std::endl;
 
-	assertValid(cards, player, result.winningMove);
+	assertValid(*game.cards, player, result.winningMove);
 
 	return result;
 }
 
 
 
-SearchTimeResult Board::searchTime(const CardsInfo& cards, S64 timeMs, bool player, bool searchWin, Score alpha, Score beta) {
+SearchTimeResult Board::searchTime(const Game& game, S64 timeMs, bool player, bool searchWin, Score alpha, Score beta) {
 	SearchResult result;
 	ScoreParsed parsedScore{};
 	Depth depth = 0;
@@ -71,7 +71,7 @@ SearchTimeResult Board::searchTime(const CardsInfo& cards, S64 timeMs, bool play
 	while (depth < 511) {
 		depth++;
 
-		result = search(cards, depth, player, (parsedScore.outcome != SCORE::DRAW) || searchWin, alpha, beta, false);
+		result = search(game, depth, player, (parsedScore.outcome != SCORE::DRAW) || searchWin, alpha, beta, false);
 		if (result.winningMove)
 			break;
 		parsedScore = parseScore(result.score);
