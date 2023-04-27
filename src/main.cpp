@@ -3,11 +3,13 @@
 #include "card.hpp"
 #include "connection.h"
 #include "game.h"
+#include "test/testMain.h"
 
 #include <iostream>
 
 
 int main(int argc, char** argv) {
+	testMain();
 
 	if (0) {
 		auto& cards = CARDS_PERFT;

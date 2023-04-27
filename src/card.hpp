@@ -226,7 +226,7 @@ struct CardsInfo {
 	MoveBoardSet moveBoards;
 	CardSet cards;
 
-	static CardsInfo create(CardSet cards) {
+	constexpr static CardsInfo create(CardSet cards) {
 		return {
 			generateMoveBoardSet(cards),
 			cards

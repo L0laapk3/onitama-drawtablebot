@@ -60,36 +60,44 @@ std::string cardsShortName(Card card, int length) {
 		res += card.name.size() > i ? card.name[i] : ' ';
 	return res;
 }
-void Board::print(const CardsInfo& cards, char turnIndicator) const {
+std::string Board::toString(const CardsInfo& cards, char turnIndicator) const {
+	std::string outString = "";
 	auto perm = CARDS_PERMUTATIONS[cardI];
 
-	std::cout << std::endl << cardsShortName(cards.cards[perm.playerCards[0][0]], 4) << ' ' << cardsShortName(cards.cards[perm.playerCards[0][1]], 4) << std::endl;
+	outString += "\n" + cardsShortName(cards.cards[perm.playerCards[0][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[0][1]], 4) + "\n";
 
 	auto sideCard = cardsShortName(cards.cards[perm.sideCard], 5);
 	for (int r = 0; r < 5; r++) {
-		std::cout << (r == 4 ? turnIndicator : ' ') << '|';
+		outString += std::string(1, r == 4 ? turnIndicator : ' ') + "|";
 
 		for (int c = 5; c --> 0;) {
 			const int mask = 1 << (5 * r + c);
 			if (p[0] & mask) {
-				if ((p[1] | k[1]) & mask)    std::cout << '?'; // invalid
-				else if (k[0] & mask)        std::cout << 'X';
-				else                         std::cout << '+';
+				if ((p[1] | k[1]) & mask)    outString += "?"; // invalid
+				else if (k[0] & mask)        outString += "X";
+				else                         outString += "+";
 			} else if (p[1] & mask) {
-				if (k[1] & mask)             std::cout << '0';
-				else                         std::cout << 'o';
-			} else if ((k[0] | k[1]) & mask) std::cout << '!'; // invalid
-			else                             std::cout << '.';
+				if (k[1] & mask)             outString += "0";
+				else                         outString += "o";
+			} else if ((k[0] | k[1]) & mask) outString += "!"; // invalid
+			else                             outString += ".";
 		}
-		std::cout << '|' << sideCard[r] << std::endl;
+		outString += "|" + std::string(1, sideCard[r]) + "\n";
 	}
-	std::cout << cardsShortName(cards.cards[perm.playerCards[1][0]], 4) << ' ' << cardsShortName(cards.cards[perm.playerCards[1][1]], 4) << std::endl << std::endl;
+	outString += cardsShortName(cards.cards[perm.playerCards[1][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[1][1]], 4) + "\n\n";
+	return outString;
 }
+std::string Board::toString(const CardsInfo& cards) const {
+	return toString(cards, ' ');
+};
+std::string Board::toString(const CardsInfo& cards, bool player) const {
+	return toString(cards, player ? 'X' : '0');
+};
 void Board::print(const CardsInfo& cards) const {
-	print(cards, ' ');
+	std::cout << toString(cards);
 };
 void Board::print(const CardsInfo& cards, bool player) const {
-	print(cards, player ? 'X' : '0');
+	std::cout << toString(cards, player);
 };
 
 
@@ -105,6 +113,7 @@ Board Board::invert() const {
 			kPrev >>= 1;
 		}
 	}
+	board.cardI = CARDS_INVERT[cardI];
 	return board;
 }
 

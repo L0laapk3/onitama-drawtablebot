@@ -8,6 +8,7 @@
 #include <functional>
 #include <limits>
 #include <type_traits>
+#include <string>
 
 
 
@@ -24,8 +25,10 @@ public:
 	// boardUtil.cpp
 	static Board create(std::array<U32, 2> p = { 0b00000'00000'00000'00000'11111, 0b11111'00000'00000'00000'00000 }, std::array<U32, 2> k = { 0b00000'00000'00000'00000'00100, 0b00100'00000'00000'00000'00000 }, bool player = 0);
 private:
-	void print(const CardsInfo& cards, char turnIndicator) const;
+	std::string toString(const CardsInfo& cards, char turnIndicator) const;
 public:
+	std::string toString(const CardsInfo& cards) const;
+	std::string toString(const CardsInfo& cards, bool player) const;
 	void print(const CardsInfo& cards) const;
 	void print(const CardsInfo& cards, bool player) const;
 	Board invert() const;
