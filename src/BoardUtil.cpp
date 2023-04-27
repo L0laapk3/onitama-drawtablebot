@@ -1,4 +1,6 @@
 #include "board.h"
+#include "zobrist.h"
+
 #include <iostream>
 #include <bitset>
 #include <immintrin.h>
@@ -103,4 +105,23 @@ Board Board::invert() const {
 
 bool Board::operator==(const Board& other) const {
 	return p[0] == other.p[0] && p[1] == other.p[1] && k[0] == other.k[0] && k[1] == other.k[1] && cardI == other.cardI;
+}
+
+
+void Board::recalculateHash(bool player) {
+	hash = 0;
+	for (U64 player = 0; player < 2; player++) {
+		U32 sourceBits = p[player];
+		while (sourceBits) {
+			U32 sourcePiece = sourceBits & -sourceBits;
+			sourceBits &= sourceBits - 1;
+			U32 sourceIndex = _tzcnt_u32(sourcePiece);
+			hash ^= sourcePiece & k[player] ? ZOBRIST.kings[player][sourceIndex] : ZOBRIST.pawns[player][sourceIndex];
+		}
+	}
+
+	if (player)
+		hash ^= ZOBRIST.turn;
+
+	hash ^= ZOBRIST.cards[cardI];
 }

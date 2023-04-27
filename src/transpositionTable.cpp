@@ -11,10 +11,10 @@ TranspositionTableWrapper::TranspositionTableWrapper() {
 	TableDepthPreferred.resize(SIZE_DEPTH_PREFERRED);
 }
 
-Transposition& TranspositionTableWrapper::get(U64 hash) {
+Transposition TranspositionTableWrapper::get(U64 hash) {
 	if (TableReplaceAlways [hash & (SIZE_REPLACE_ALWAYS  - 1)].hash == hash) return TableReplaceAlways [hash & (SIZE_REPLACE_ALWAYS  - 1)];
 	if (TableDepthPreferred[hash & (SIZE_DEPTH_PREFERRED - 1)].hash == hash) return TableDepthPreferred[hash & (SIZE_DEPTH_PREFERRED - 1)];
-	return {};
+	return Transposition{};
 }
 
 void TranspositionTableWrapper::put(U64 hash, Transposition& transposition) {

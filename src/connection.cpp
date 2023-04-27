@@ -145,6 +145,7 @@ Connection::LoadResult Connection::load() {
 		if (boardStr.size()) {
 			Board board = parseBoard(boardStr, player);
 			auto cardsInfo = parseCards(cards, player);
+			board.recalculateHash(player);
 			board.checkValid(cardsInfo);
 			return {
 				.player = player,
@@ -174,10 +175,13 @@ void Connection::waitTurn(Game& game) {
 			game.ended = getString(message, "gameState") == "ended";
 		});
 	}
+
+	// TODO: fix this card shit so the TT's work
 	delete game.cards;
 	game.cards = new CardsInfo(parseCards(cards, game.player));
 
 	game.board = parseBoard(boardStr, game.player);
+	game.board.recalculateHash(game.player);
 	game.board.checkValid(*game.cards, game.ended);
 }
 

@@ -25,6 +25,7 @@ public:
     std::array<U32, 2> p;
     std::array<U32, 2> k;
 	U8 cardI = 10;
+	U64 hash = 0;
 
 
 	// boardUtil.cpp
@@ -38,6 +39,7 @@ public:
 	void checkValid(const CardsInfo& cards, bool isWon = false) const;
 	void assertValid(const CardsInfo& cards, bool isWon = false) const;
 	bool operator==(const Board& other) const;
+	void recalculateHash(bool player);
 
 	// boardWin.hpp
 	static constexpr std::array<U32, 2> TEMPLE = { 22, 2 };

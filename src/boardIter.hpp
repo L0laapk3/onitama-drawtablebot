@@ -1,5 +1,6 @@
 #include "board.h"
 #include "util.h"
+#include "zobrist.h"
 
 #include <immintrin.h>
 #include <x86intrin.h>
@@ -34,6 +35,8 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 			k[player] ^= sourceKing;
 			U32 kingMask = sourceKing ? ~0 : 0;
 
+			hash ^= kingMask ? ZOBRIST.kings[player][sourceIndex] : ZOBRIST.pawns[player][sourceIndex];
+
 			while (landBits && cont) {
 				U32 landPiece = landBits & -landBits;
 				landBits &= landBits - 1;
@@ -42,7 +45,9 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 				p[player] |= landPiece;
 				if (!quiet)
 					p[!player] ^= landPiece;
-				k[player] |= (landPiece & kingMask);
+				k[player] |= landPiece & kingMask;
+
+				hash ^= kingMask ? ZOBRIST.kings[quiet ? player : 2 + player][landIndex] : ZOBRIST.pawns[quiet ? player : 2][landIndex]; // quiet: combined take hash
 
 				bool other = false, stop = false;
 				#pragma unroll
@@ -50,6 +55,7 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 					if (other || (landPiece & landBitsCards[i])) {
 
 						cardI = CARDS_SWAP[thisCardI][player][i];
+						hash ^= ZOBRIST.moves[thisCardI][player][i];
 
 						assertValid(cards);
 
@@ -57,17 +63,23 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 						cont = f();
 						assume(beforeBoard2 == *this);
 
+						hash ^= ZOBRIST.moves[thisCardI][player][i];
+
 						if (!cont)
 							break;
 					} else
 						other = true;
 				}
 
+				hash ^= kingMask ? ZOBRIST.kings[quiet ? player : 2 + player][landIndex] : ZOBRIST.pawns[quiet ? player : 2][landIndex];
+
 				p[player] ^= landPiece;
 				if (!quiet)
 					p[!player] |= landPiece;
-				k[player] ^= (landPiece & kingMask);
+				k[player] ^= landPiece & kingMask;
 			}
+
+			hash ^= kingMask ? ZOBRIST.kings[player][sourceIndex] : ZOBRIST.pawns[player][sourceIndex];
 
 			p[player] |= sourcePiece;
 			k[player] |= sourceKing;

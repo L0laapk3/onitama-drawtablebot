@@ -23,6 +23,6 @@ class TranspositionTableWrapper {
 public:
 	TranspositionTableWrapper();
 
-	Transposition& get(U64 hash);
+	Transposition get(U64 hash);
 	void put(U64 hash, Transposition& transposition);
 };
