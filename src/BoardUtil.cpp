@@ -9,7 +9,7 @@
 
 
 
-Board Board::create(std::array<U32, 2> p, std::array<U32, 2> k, bool player) {
+Board Board::create(bool player, std::array<U32, 2> p, std::array<U32, 2> k) {
 	Board board{ p, k };
 	board.recalculateHash(player);
 	return board;

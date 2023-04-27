@@ -23,7 +23,7 @@ public:
 
 
 	// boardUtil.cpp
-	static Board create(std::array<U32, 2> p = { 0b00000'00000'00000'00000'11111, 0b11111'00000'00000'00000'00000 }, std::array<U32, 2> k = { 0b00000'00000'00000'00000'00100, 0b00100'00000'00000'00000'00000 }, bool player = 0);
+	static Board create(bool player = 0, std::array<U32, 2> p = { 0b00000'00000'00000'00000'11111, 0b11111'00000'00000'00000'00000 }, std::array<U32, 2> k = { 0b00000'00000'00000'00000'00100, 0b00100'00000'00000'00000'00000 });
 private:
 	std::string toString(const CardsInfo& cards, char turnIndicator) const;
 public:

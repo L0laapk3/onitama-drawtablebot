@@ -13,7 +13,7 @@ int main(int argc, char** argv) {
 
 	if (0) {
 		auto& cards = CARDS_PERFT;
-		Board board = Board::create({ 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 });
+		Board board = Board::create(0, { 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 });
 		// Board board = Board::create({ 0b00000'00000'00000'01110'00000, 0b00000'00000'00000'00000'00100 }, { 0b00000'00000'00000'00100'00000, 0b00000'00000'00000'00000'00100 });
 		board.search(cards, 9);
 		return 0;
@@ -23,14 +23,15 @@ int main(int argc, char** argv) {
 	if (1) {
 		auto& cards = CARDS_PERFT;
 
-		Board board = Board::create();
-
 		bool player = 1;
+		Board board = Board::create(player);
+
 		while (true) {
 			board.print(cards);
-			const auto& result = board.search(cards, player, 5);
+			const auto& result = board.search(cards, 5, player);
 			board = result.board;
 			player = !player;
+			board.recalculateHash(player);
 
 			if (result.winningMove)
 				return 0;

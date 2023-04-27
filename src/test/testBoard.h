@@ -16,7 +16,7 @@ struct TestBoard : public Board {
 
 	static TestBoard create(const CardsInfo& cards, std::array<U32, 2> p = { 0b00000'00000'00000'00000'11111, 0b11111'00000'00000'00000'00000 }, std::array<U32, 2> k = { 0b00000'00000'00000'00000'00100, 0b00100'00000'00000'00000'00000 }, bool player = 0) {
 		TestBoard board;
-		(Board&)board = Board::create(p, k, player);
+		(Board&)board = Board::create(player, p, k);
 		board.cards = &cards;
 		board.player = player;
 		return board;
