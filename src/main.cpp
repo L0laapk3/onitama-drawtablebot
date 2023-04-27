@@ -13,7 +13,7 @@ void singleSearch() {
 	auto& cards = CARDS_PERFT;
 	Board board = Board::create(0, { 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 });
 	// Board board = Board::create({ 0b00000'00000'00000'01110'00000, 0b00000'00000'00000'00000'00100 }, { 0b00000'00000'00000'00100'00000, 0b00000'00000'00000'00000'00100 });
-	board.search(cards, 9);
+	board.search(cards, 14);
 }
 
 
@@ -31,7 +31,7 @@ void selfPlay() {
 		players.push_back(player);
 
 		std::cout << (player ? "0" : "X") << ": ";
-		const auto& result = board.search(cards, 7, player);
+		const auto& result = board.search(cards, 3, player);
 		board = result.board;
 		player = !player;
 		board.recalculateHash(player);
@@ -66,6 +66,8 @@ void onlinePlay(int argc, char** argv) {
 		game.board.print(*game.cards, game.myTurn);
 		if (game.myTurn) {
 			auto result = game.board.searchTime(*game.cards, 50);
+			result.board.print(*game.cards, !game.myTurn);
+			result.board.checkValid(*game.cards, !game.myTurn);
 			conn.submitMove(game, result.board, 0);
 		} else
 			std:: cout << "-" << std::endl;
@@ -82,7 +84,7 @@ void onlinePlay(int argc, char** argv) {
 
 
 int main(int argc, char** argv) {
-	if (1)
+	if (0)
 		testMain();
 
 	if (0) {
@@ -90,7 +92,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	if (1) {
+	if (0) {
 		selfPlay();
 		return 0;
 	}

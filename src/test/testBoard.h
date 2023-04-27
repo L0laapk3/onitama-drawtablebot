@@ -77,3 +77,7 @@ TEST_CASE("board.iter symmetry") {
 
 	CHECK_EQ(childBoards.size(), 0);
 }
+
+
+
+// TEST_CASE("move while losing")

@@ -20,6 +20,11 @@ SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, Sco
 	if (print)
 		printf("Depth: %d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score).c_str(), result.durationUs / 1000);
 
+	if (!result.foundMove)
+		std::cout << "no move found" << std::endl;
+
+	assertValid(cards, player, result.winningMove);
+
 	return result;
 }
 
@@ -30,15 +35,15 @@ SearchTimeResult Board::searchTime(const CardsInfo& cards, S64 timeMs, bool play
 	Depth depth = 0;
 
 	S64 lastDurationUs = 1;
-	while (depth < 512) {
+	while (depth < 3) {
 		depth++;
 
 		result = search(cards, depth, player, alpha, beta, false);
 		if (result.winningMove)
 			break;
 		auto parsedScore = parseScore(result.score);
-		if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth)
-			break;
+		// if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth)
+		// 	break;
 
 		int predictedTime = result.durationUs * result.durationUs / std::max<int>(lastDurationUs, 1);
 		lastDurationUs = result.durationUs;

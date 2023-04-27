@@ -33,15 +33,19 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 	}
 
 	Board nextBoard;
-	nextBoard.p[0] = 0;
-	iterateMoves<player>(cards, depthLeft <= 0, [&]() {
+	bool foundMove = false;
+	Score bestScore = SCORE::MIN;
+	iterateMoves<player>(cards, !root && depthLeft <= 0, [&]() {
+		foundMove = true;
 		Board beforeBoard = *this;
 		Score score = -search<!player>(cards, -beta, -alpha, depthLeft - 1);
 
-		score -= score >= 0 ? 1 : -1; // move score closer to zero for every move
+		// score -= score >= 0 ? 1 : -1; // move score closer to zero for every move
 
-		if (score > alpha)
+		if (root && score > bestScore) {
 			nextBoard = *this;
+			bestScore = score;
+		}
 		if (score >= beta) {
 			alpha = beta;
 			return false;
@@ -53,5 +57,5 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 
 	assume(*this == beforeBoard);
 
-	return SearchResult{ alpha, nextBoard, nextBoard.p[0] != 0 };
+	return SearchResult{ alpha, nextBoard, foundMove };
 }
