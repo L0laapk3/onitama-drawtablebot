@@ -82,7 +82,8 @@ void onlinePlay(int argc, char** argv) {
 
 
 int main(int argc, char** argv) {
-	testMain();
+	if (1)
+		testMain();
 
 	if (0) {
 		singleSearch();
