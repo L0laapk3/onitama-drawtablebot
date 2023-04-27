@@ -18,17 +18,15 @@ int main(int argc, char** argv) {
 	}
 
 
-	if (0) {
+	if (1) {
 		auto& cards = CARDS_PERFT;
 
 		Board board = Board::create();
-		board.p[1] = board.k[1];
 
-		bool player = 0;
+		bool player = 1;
 		while (true) {
 			board.print(cards);
 			const auto& result = board.search(cards, player, 5);
-			std::cout << "Result: " << result.score << std::endl;
 			board = result.board;
 			player = !player;
 
@@ -53,11 +51,15 @@ int main(int argc, char** argv) {
 	Game game(conn);
 	game.board.assertValid(*game.cards, !game.myTurn);
 
+	std::cout << (game.player ? "red" : "blue") << std::endl;
+
 	while (true) {
+		game.board.print(*game.cards, game.myTurn);
 		if (game.myTurn) {
-			auto result = game.board.searchTime(*game.cards, 1000);
+			auto result = game.board.searchTime(*game.cards, 50);
 			conn.submitMove(game, result.board, 0);
-		}
+		} else
+			std:: cout << "-" << std::endl;
 
 		conn.waitTurn(game);
 		if (game.ended) {

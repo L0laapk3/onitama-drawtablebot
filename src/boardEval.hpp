@@ -1,14 +1,12 @@
 #include "board.h"
 
 #include "card.hpp"
+#include "score.h"
 
 #include <immintrin.h>
 #include <x86intrin.h>
 
 
-
-constexpr Score MUL_POSITION_ADVANTAGE = 1000;
-constexpr Score MUL_PIECE_ADVANTAGE    = 1000 * MUL_POSITION_ADVANTAGE;
 
 constexpr std::array<Score, 33> pawnScores{
 	0, 1, 2, 1, 0,

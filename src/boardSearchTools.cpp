@@ -18,7 +18,7 @@ SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, Sco
 	auto end = std::chrono::high_resolution_clock::now();
 	result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	if (print)
-		printf("Depth: %d, Time: %lldms\n", depth, result.durationUs / 1000);
+		printf("Depth: %d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score).c_str(), result.durationUs / 1000);
 
 	return result;
 }
@@ -36,13 +36,16 @@ SearchTimeResult Board::searchTime(const CardsInfo& cards, S64 timeMs, bool play
 		result = search(cards, depth, player, alpha, beta, false);
 		if (result.winningMove)
 			break;
+		auto parsedScore = parseScore(result.score);
+		if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth)
+			break;
 
 		int predictedTime = result.durationUs * result.durationUs / std::max<int>(lastDurationUs, 1);
 		lastDurationUs = result.durationUs;
 		if (predictedTime > timeMs * 1000)
 			break;
 	}
-	printf("Depth: %d, Time: %lldms\n", depth, result.durationUs / 1000);
+	printf("Depth: %d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score).c_str(), result.durationUs / 1000);
 	return {
 		result,
 		depth,

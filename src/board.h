@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "score.h"
 #include "card.hpp"
 
 #include <array>
@@ -9,14 +10,6 @@
 #include <type_traits>
 
 
-typedef int Score;
-enum SCORE : int {
-	WIN = std::numeric_limits<int>::max(),
-	LOSE = -std::numeric_limits<int>::max(),
-	DRAW = 0,
-};
-
-typedef S16 Depth;
 
 struct SearchResult;
 struct SearchTimeResult;
