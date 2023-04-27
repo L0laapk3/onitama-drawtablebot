@@ -22,6 +22,7 @@ void Board::checkValid(const CardsInfo& cards, bool player, bool isWon) const {
 			std::cout << "Invalid board!" << std::endl;
 			print(cards);
 			assert(false);
+			std::exit(1);
 		}
 	};
 
@@ -62,7 +63,7 @@ std::string cardsShortName(Card card, int length) {
 }
 
 std::string Board::toString(const CardsInfo& cards, std::vector<Board> boards, std::vector<char> turnIndicators) {
-	std::string outString = "";
+	std::string outString{};
 	constexpr int BOARDS_PER_LINE = 8;
 
 	for (int i = 0; i < boards.size(); i += BOARDS_PER_LINE) {
@@ -115,16 +116,18 @@ std::string Board::toString(const CardsInfo& cards, std::vector<Board> boards) {
 	return toString(cards, boards, turnIndicators);
 }
 std::string Board::toString(const CardsInfo& cards, bool player) const {
-	return Board::toString(cards, std::vector<Board>({ *this }), std::vector<bool>({ player }));
+	return Board::toString(cards, { *this }, std::vector<bool>{ player });
 };
 std::string Board::toString(const CardsInfo& cards) const {
-	return Board::toString(cards, std::vector<Board>({ *this }));
+	return Board::toString(cards, { *this });
 };
 void Board::print(const CardsInfo& cards) const {
-	std::cout << toString(cards);
+	auto str = toString(cards);
+	std::cout << str << std::flush;
 };
 void Board::print(const CardsInfo& cards, bool player) const {
-	std::cout << toString(cards, player);
+	auto str = toString(cards, player);
+	std::cout << str << std::flush;
 };
 
 

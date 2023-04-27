@@ -66,8 +66,8 @@ void onlinePlay(int argc, char** argv) {
 		// game.board.print(*game.cards, game.myTurn);
 		if (game.myTurn) {
 			auto result = game.board.searchTime(*game.cards, 50);
-			// result.board.print(*game.cards, !game.myTurn);
-			result.board.checkValid(*game.cards, !game.myTurn);
+			// result.board.print(*game.cards, game.myTurn);
+			result.board.checkValid(*game.cards, game.myTurn, result.winningMove);
 			conn.submitMove(game, result.board, 0);
 		} else
 			std:: cout << "-" << std::endl;

@@ -19,7 +19,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 		Board board = *this;
 		if (root) {
 			board.doWinInOne<player>(moveList);
-			board.assertValid(cards, player, true);
+			board.assertValid(cards, !player, true);
 		}
 		return SearchResult{ SCORE::WIN, board, true, true };
 	}
