@@ -21,8 +21,6 @@ void Board::checkValid(const CardsInfo& cards, bool player, bool isWon) const {
 		if (!result) {
 			std::cout << "Invalid board!" << std::endl;
 			print(cards);
-			Board tmpBoard = *this;
-			tmpBoard.recalculateHash(player);
 			assert(false);
 		}
 	};

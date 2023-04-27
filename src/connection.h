@@ -17,7 +17,7 @@ public:
 	~Connection();
 
 	static CardsInfo parseCards(std::array<std::string, 5> cardNames, bool flipped);
-	static Board parseBoard(std::string str, bool flip);
+	static Board parseBoard(std::string str, bool flip, bool player, U8 cardI = 10);
 
 	void sendCreate();
 	void sendJoin(const std::string& matchId);

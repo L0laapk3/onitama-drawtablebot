@@ -92,7 +92,7 @@ void Connection::sendJoin(const std::string& matchId) {
 
 
 
-Board Connection::parseBoard(std::string str, bool flip) {
+Board Connection::parseBoard(std::string str, bool flip, bool player, U8 cardI) {
 	Board board{};
 	for (int i = 0; i < 25; i++) {
 		const auto c = str[flip ? 24ULL - i : i];
@@ -107,7 +107,8 @@ Board Connection::parseBoard(std::string str, bool flip) {
 				board.k[!flip] |= 1ULL << i;
 		}
 	}
-	board.cardI = 10; // 10 is the one with the cards in order 0, 1, 2, 3, 4
+	board.cardI = cardI; // 10 is the one with the cards in order 0, 1, 2, 3, 4
+	board.recalculateHash(player);
 	return board;
 }
 
@@ -143,10 +144,9 @@ Connection::LoadResult Connection::load() {
 			}
 		});
 		if (boardStr.size()) {
-			Board board = parseBoard(boardStr, player);
+			Board board = parseBoard(boardStr, player, !myTurn);
 			auto cardsInfo = parseCards(cards, player);
-			board.recalculateHash(player);
-			board.checkValid(cardsInfo, player);
+			board.checkValid(cardsInfo, !myTurn);
 			return {
 				.player = player,
 				.myTurn = myTurn,
@@ -176,13 +176,23 @@ void Connection::waitTurn(Game& game) {
 		});
 	}
 
-	// TODO: fix this card shit so the TT's work
-	delete game.cards;
-	game.cards = new CardsInfo(parseCards(cards, game.player));
+	U8 cardI = (U8)-1;
+	for (U8 _cardI = 0; _cardI < 30; _cardI++) {
+		auto& perm = CARDS_PERMUTATIONS[_cardI];
+		if (((cards[perm.playerCards[game.player][0]] == game.cards->cards[0].name && cards[perm.playerCards[game.player][1]] == game.cards->cards[0].name) ||
+		     (cards[perm.playerCards[game.player][1]] == game.cards->cards[1].name && cards[perm.playerCards[game.player][0]] == game.cards->cards[1].name)) &&
+		    ((cards[perm.playerCards[!game.player][0]] == game.cards->cards[2].name && cards[perm.playerCards[!game.player][1]] == game.cards->cards[2].name) ||
+		     (cards[perm.playerCards[!game.player][1]] == game.cards->cards[3].name && cards[perm.playerCards[!game.player][0]] == game.cards->cards[3].name)) &&
+		     (cards[perm.sideCard] == game.cards->cards[4].name))
+			cardI = _cardI;
+	}
+	if (cardI == (U8)-1)
+		throw std::runtime_error("wtf no card found"); // TODO
 
-	game.board = parseBoard(boardStr, game.player);
-	game.board.recalculateHash(game.player);
-	game.board.checkValid(*game.cards, game.ended, game.player);
+	game.board = parseBoard(boardStr, game.player, !game.myTurn, cardI);
+
+	game.board.recalculateHash(!game.myTurn);
+	game.board.checkValid(*game.cards, game.ended, !game.myTurn);
 }
 
 std::string indexToPos(U32 i, bool flipped) {

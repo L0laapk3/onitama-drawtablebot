@@ -9,7 +9,7 @@
 
 int main(int argc, char** argv) {
 
-	if (1) {
+	if (0) {
 		auto& cards = CARDS_PERFT;
 		Board board = Board::create({ 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 });
 		// Board board = Board::create({ 0b00000'00000'00000'01110'00000, 0b00000'00000'00000'00000'00100 }, { 0b00000'00000'00000'00100'00000, 0b00000'00000'00000'00000'00100 });
@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
 		conn.sendCreate();
 
 	Game game(conn);
+	game.board.assertValid(*game.cards, !game.myTurn);
 
 	while (true) {
 		if (game.myTurn) {

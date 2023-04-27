@@ -10,8 +10,8 @@ struct Transposition {
 	U64 hash;
 	Score score;
 	Depth depth;
-	// bestMove
-	// node type
+	// TODO bestMove
+	// TODO node type
 };
 
 
