@@ -101,7 +101,7 @@ void Board::print(const CardsInfo& cards, bool player) const {
 };
 
 
-Board Board::invert() const {
+Board Board::invert(bool player) const {
 	Board board{};
 	for (U64 kI = 0; kI < 2; kI++) {
 		U64 pPrev = p[kI];
@@ -114,6 +114,7 @@ Board Board::invert() const {
 		}
 	}
 	board.cardI = CARDS_INVERT[cardI];
+	board.recalculateHash(!player);
 	return board;
 }
 

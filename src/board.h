@@ -31,7 +31,7 @@ public:
 	std::string toString(const CardsInfo& cards, bool player) const;
 	void print(const CardsInfo& cards) const;
 	void print(const CardsInfo& cards, bool player) const;
-	Board invert() const;
+	Board invert(bool player) const;
 	void checkValid(const CardsInfo& cards, bool player, bool isWon = false) const;
 	void assertValid(const CardsInfo& cards, bool player, bool isWon = false) const;
 	bool operator==(const Board& other) const;

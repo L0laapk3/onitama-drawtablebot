@@ -6,6 +6,7 @@
 
 #include <queue>
 #include <sstream>
+#include <algorithm>
 
 
 struct TestBoard : public Board {
@@ -23,10 +24,14 @@ struct TestBoard : public Board {
 
 	TestBoard invert() {
 		TestBoard board;
-		(Board&)board = Board::invert();
+		(Board&)board = Board::invert(board.player);
 		board.cards = cards;
 		board.player = !player;
 		return board;
+	}
+	TestBoard invert(bool player) {
+		assert(player == this->player);
+		return invert();
 	}
 
 	template<bool player, typename Callable>
@@ -45,24 +50,28 @@ std::ostream& operator<<(std::ostream& os, const TestBoard& board) {
 
 
 TEST_CASE("board.invert symmetry") {
-	TestBoard board = TestBoard::create(CARDS_PERFT), board2 = board;
+	auto board = TestBoard::create(CARDS_PERFT), board2 = board;
 	CHECK_EQ(board.invert().invert(), board2);
 }
 
 
 
 TEST_CASE("board.iter symmetry") {
-	TestBoard board = TestBoard::create(CARDS_PERFT);
-	std::queue<TestBoard> childBoards;
+	auto board = TestBoard::create(CARDS_PERFT), board2 = board;
+	std::vector<TestBoard> childBoards;
 
 	board.iterateMoves<0>(*board.cards, 0, [&]() {
-		childBoards.push(board);
+		CHECK_NE(board, board2);
+		childBoards.push_back(board.invert());
+		INFO("generated", childBoards.back());
 		return true;
 	});
 
-	board.invert().iterateMoves<1>(*board.cards, 0, [&]() {
-		CHECK_EQ(board, childBoards.front().invert());
-		childBoards.pop();
+	board = board.invert();
+	board.iterateMoves<1>(*board.cards, 0, [&]() {
+		auto it = std::find(childBoards.begin(), childBoards.end(), board);
+		REQUIRE_MESSAGE(it != childBoards.end(), "could not find", board);
+		childBoards.erase(it);
 		return true;
 	});
 

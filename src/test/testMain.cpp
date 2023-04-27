@@ -11,6 +11,6 @@ void testMain() {
 
     int res = context.run();
 
-    if(context.shouldExit())
-        std::exit(1);
+    if (context.shouldExit() || res)
+        std::exit(res);
 }
