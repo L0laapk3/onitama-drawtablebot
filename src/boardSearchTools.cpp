@@ -6,6 +6,16 @@
 
 
 
+void narrowSearchForWin(ScoreParsed& score, Score& alpha, Score& beta) {
+	if (score.outcome == SCORE::WIN) {
+		beta = SCORE::WIN;
+		alpha = beta - DEPTH_MAX;
+	} else if (score.outcome == SCORE::LOSS) {
+		alpha = SCORE::LOSS;
+		beta = alpha + DEPTH_MAX;
+	}
+}
+
 
 SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, bool searchWin, Score alpha, Score beta, bool print) {
 	assertValid(cards, player);
@@ -19,18 +29,24 @@ SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, boo
 			result = search<0, true>(cards, alpha, beta, depth);
 		auto end = std::chrono::high_resolution_clock::now();
 		result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+
+		auto parsed = parseScore(result.score);
+		if (parsed.outcome != SCORE::DRAW) {
+			searchWin = true;
+ 			narrowSearchForWin(parsed, alpha, beta);
+		}
 	}
 
-	if (result.score == SCORE::WIN) {
-		std::cout << "redoing search with win distance" << std::endl;
+	if (searchWin) {
 		// search again and care about win distance
+		auto prevDuration = result.durationUs;
 		auto start = std::chrono::high_resolution_clock::now();
 		if (player)
 			result = search<1, true, true>(cards, alpha, beta, depth);
 		else
 			result = search<0, true, true>(cards, alpha, beta, depth);
 		auto end = std::chrono::high_resolution_clock::now();
-		result.durationUs += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+		result.durationUs = prevDuration + std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	}
 
 	if (print)

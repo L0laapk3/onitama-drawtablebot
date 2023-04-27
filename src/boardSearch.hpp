@@ -38,10 +38,11 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 	iterateMoves<player>(cards, !root && depthLeft <= 0, [&]() {
 		foundMove = true;
 		Board beforeBoard = *this;
-		Score score = -search<!player>(cards, -beta, -alpha, depthLeft - 1);
+		Score score = -search<!player, false, trackDistance>(cards, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
+		// TODO: figure out if trackDistance like this ruins the benefits of ab
 
-		if (trackDistance)
-			score -= score >= 0 ? 1 : -1; // move score closer to zero for every move
+		if (trackDistance) // move score closer to zero for every move
+			score -= score >= 0 ? 1 : -1;
 
 		if (root && score > bestScore) {
 			nextBoard = *this;
@@ -51,6 +52,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 			alpha = beta;
 			return false;
 		}
+
 		if (score > alpha)
 			alpha = score;
 		return true;
