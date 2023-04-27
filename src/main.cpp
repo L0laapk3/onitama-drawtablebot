@@ -31,7 +31,7 @@ void selfPlay() {
 		players.push_back(player);
 
 		std::cout << (player ? "0" : "X") << ": ";
-		const auto& result = board.search(cards, 3, player);
+		const auto& result = board.searchTime(cards, 50, player);
 		board = result.board;
 		player = !player;
 		board.recalculateHash(player);
@@ -63,10 +63,10 @@ void onlinePlay(int argc, char** argv) {
 	std::cout << (game.player ? "red" : "blue") << std::endl;
 
 	while (true) {
-		game.board.print(*game.cards, game.myTurn);
+		// game.board.print(*game.cards, game.myTurn);
 		if (game.myTurn) {
 			auto result = game.board.searchTime(*game.cards, 50);
-			result.board.print(*game.cards, !game.myTurn);
+			// result.board.print(*game.cards, !game.myTurn);
 			result.board.checkValid(*game.cards, !game.myTurn);
 			conn.submitMove(game, result.board, 0);
 		} else

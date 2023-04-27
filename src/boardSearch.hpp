@@ -7,7 +7,7 @@
 
 // negamax implementation
 // p0 is the maximizer
-template<bool player, bool root>
+template<bool player, bool root, bool trackDistance>
 std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft) {
 	Board beforeBoard = *this;
 
@@ -40,7 +40,8 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 		Board beforeBoard = *this;
 		Score score = -search<!player>(cards, -beta, -alpha, depthLeft - 1);
 
-		// score -= score >= 0 ? 1 : -1; // move score closer to zero for every move
+		if (trackDistance)
+			score -= score >= 0 ? 1 : -1; // move score closer to zero for every move
 
 		if (root && score > bestScore) {
 			nextBoard = *this;

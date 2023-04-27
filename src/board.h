@@ -73,12 +73,12 @@ public:
 	void iterateMoves(const CardsInfo& cards, bool quiesence, const Callable f);
 
 	// boardSearch.hpp
-	template<bool player, bool root = false>
+	template<bool player, bool root = false, bool trackDistance = false>
 	std::conditional_t<root, SearchResult, Score> search(const CardsInfo& cards, Score alpha, Score beta, Depth depthLeft);
 
 	// boardSearchTools.cpp
-	SearchResult search(const CardsInfo& cards, Depth depth, bool player = 0, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
-	SearchTimeResult searchTime(const CardsInfo& cards, S64 timeMs, bool player = 0, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN);
+	SearchResult search(const CardsInfo& cards, Depth depth, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
+	SearchTimeResult searchTime(const CardsInfo& cards, S64 timeMs, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN);
 	// SearchTimeResult searchTimeWithPanic(const CardsInfo& cards, S64 timeMs, bool player = 0, SearchTimeResult& lastResult);
 };
 

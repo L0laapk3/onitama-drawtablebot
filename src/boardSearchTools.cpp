@@ -7,16 +7,32 @@
 
 
 
-SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, Score alpha, Score beta, bool print) {
+SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, bool searchWin, Score alpha, Score beta, bool print) {
 	assertValid(cards, player);
 	SearchResult result;
-	auto start = std::chrono::high_resolution_clock::now();
-	if (player)
-		result = search<1, true>(cards, alpha, beta, depth);
-	else
-		result = search<0, true>(cards, alpha, beta, depth);
-	auto end = std::chrono::high_resolution_clock::now();
-	result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+	result.durationUs = 0;
+	if (!searchWin) {
+		auto start = std::chrono::high_resolution_clock::now();
+		if (player)
+			result = search<1, true>(cards, alpha, beta, depth);
+		else
+			result = search<0, true>(cards, alpha, beta, depth);
+		auto end = std::chrono::high_resolution_clock::now();
+		result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+	}
+
+	if (result.score == SCORE::WIN) {
+		std::cout << "redoing search with win distance" << std::endl;
+		// search again and care about win distance
+		auto start = std::chrono::high_resolution_clock::now();
+		if (player)
+			result = search<1, true, true>(cards, alpha, beta, depth);
+		else
+			result = search<0, true, true>(cards, alpha, beta, depth);
+		auto end = std::chrono::high_resolution_clock::now();
+		result.durationUs += std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+	}
+
 	if (print)
 		printf("Depth: %d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score).c_str(), result.durationUs / 1000);
 
@@ -30,20 +46,21 @@ SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, Sco
 
 
 
-SearchTimeResult Board::searchTime(const CardsInfo& cards, S64 timeMs, bool player, Score alpha, Score beta) {
+SearchTimeResult Board::searchTime(const CardsInfo& cards, S64 timeMs, bool player, bool searchWin, Score alpha, Score beta) {
 	SearchResult result;
+	ScoreParsed parsedScore{};
 	Depth depth = 0;
 
 	S64 lastDurationUs = 1;
-	while (depth < 3) {
+	while (depth < 511) {
 		depth++;
 
-		result = search(cards, depth, player, alpha, beta, false);
+		result = search(cards, depth, player, (parsedScore.outcome != SCORE::DRAW) || searchWin, alpha, beta, false);
 		if (result.winningMove)
 			break;
-		auto parsedScore = parseScore(result.score);
-		// if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth)
-		// 	break;
+		parsedScore = parseScore(result.score);
+		if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth)
+			break;
 
 		int predictedTime = result.durationUs * result.durationUs / std::max<int>(lastDurationUs, 1);
 		lastDurationUs = result.durationUs;
