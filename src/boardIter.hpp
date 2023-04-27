@@ -60,17 +60,17 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 						hash ^= ZOBRIST.moves[thisCardI][player][i];
 
 						assertValid(cards, !player);
-
 						Board beforeBoard2 = *this;
 						cont = f();
-						assume(beforeBoard2 == *this);
+						assume(*this == beforeBoard2);
+						assertValid(cards, !player);
 
 						hash ^= ZOBRIST.moves[thisCardI][player][i];
 
 						if (!cont)
 							break;
 					} else
-						other = true;
+						other = true; // one of two cards must be used
 				}
 
 				hash ^= kingMask ? ZOBRIST.kings[quiet ? player : 2 + player][landIndex] : ZOBRIST.pawns[quiet ? player : 2][landIndex];
@@ -86,7 +86,11 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 			p[player] |= sourcePiece;
 			k[player] |= sourceKing;
 
-			assertValid(cards, !player);
+#ifndef NDEBUG
+			Board tmpBoard = *this;
+			tmpBoard.cardI = thisCardI;
+			tmpBoard.assertValid(cards, !player);
+#endif
 		} while (sourceBits && cont);
 		if (!cont || quiesence)
 			break;

@@ -80,4 +80,6 @@ void inline Board::doWinInOne(const MoveBoardList& moveList) {
 		p[!player] &= ~k[player];
 	}
 	cardI = CARDS_SWAP[cardI][player][secondCard];
+
+	recalculateHash(player);
 }

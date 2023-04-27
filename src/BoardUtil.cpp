@@ -9,8 +9,10 @@
 
 
 
-Board Board::create(std::array<U32, 2> p, std::array<U32, 2> k) {
-	return Board{ p, k };
+Board Board::create(std::array<U32, 2> p, std::array<U32, 2> k, bool player) {
+	Board board{ p, k };
+	board.recalculateHash(player);
+	return board;
 }
 
 
@@ -19,6 +21,8 @@ void Board::checkValid(const CardsInfo& cards, bool player, bool isWon) const {
 		if (!result) {
 			std::cout << "Invalid board!" << std::endl;
 			print(cards);
+			Board tmpBoard = *this;
+			tmpBoard.recalculateHash(player);
 			assert(false);
 		}
 	};
