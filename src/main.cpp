@@ -8,51 +8,49 @@
 #include <iostream>
 
 
-int main(int argc, char** argv) {
-	testMain();
 
-	if (0) {
-		auto& cards = CARDS_PERFT;
-		Board board = Board::create(0, { 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 });
-		// Board board = Board::create({ 0b00000'00000'00000'01110'00000, 0b00000'00000'00000'00000'00100 }, { 0b00000'00000'00000'00100'00000, 0b00000'00000'00000'00000'00100 });
-		board.search(cards, 9);
-		return 0;
-	}
+void singleSearch() {
+	auto& cards = CARDS_PERFT;
+	Board board = Board::create(0, { 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 });
+	// Board board = Board::create({ 0b00000'00000'00000'01110'00000, 0b00000'00000'00000'00000'00100 }, { 0b00000'00000'00000'00100'00000, 0b00000'00000'00000'00000'00100 });
+	board.search(cards, 9);
+}
 
 
-	if (1) {
-		auto& cards = CARDS_PERFT;
 
-		bool player = 1;
-		Board board = Board::create(player);
-		std::vector<Board> boards{};
-		std::vector<bool> players{};
+void selfPlay() {
+	auto& cards = CARDS_PERFT;
 
-		while (true) {
-			boards.push_back(board);
-			players.push_back(player);
+	bool player = 1;
+	Board board = Board::create(player);
+	std::vector<Board> boards{};
+	std::vector<bool> players{};
 
-			std::cout << (player ? "0" : "X") << ": ";
-			const auto& result = board.search(cards, 5, player);
-			board = result.board;
-			player = !player;
-			board.recalculateHash(player);
-
-			if (result.winningMove)
-				break;
-			if (!result.foundMove) {
-				std::cerr << "didnt find any moves" << std::endl;
-				break;
-			}
-		}
+	while (true) {
 		boards.push_back(board);
 		players.push_back(player);
-		std::cout << Board::toString(cards, boards, players);
-		return 0;
+
+		std::cout << (player ? "0" : "X") << ": ";
+		const auto& result = board.search(cards, 7, player);
+		board = result.board;
+		player = !player;
+		board.recalculateHash(player);
+
+		if (result.winningMove)
+			break;
+		if (!result.foundMove) {
+			std::cerr << "didnt find any moves" << std::endl;
+			break;
+		}
 	}
+	boards.push_back(board);
+	players.push_back(player);
+	std::cout << Board::toString(cards, boards, players);
+}
 
 
 
+void onlinePlay(int argc, char** argv) {
 	auto conn = Connection();
 	if (argc > 1)
 		conn.sendJoin(argv[1]);
@@ -78,6 +76,26 @@ int main(int argc, char** argv) {
 			break;
 		}
 	}
+}
 
-	return 0;
+
+
+
+int main(int argc, char** argv) {
+	testMain();
+
+	if (0) {
+		singleSearch();
+		return 0;
+	}
+
+	if (1) {
+		selfPlay();
+		return 0;
+	}
+
+	if (1) {
+		onlinePlay(argc, argv);
+		return 0;
+	}
 }

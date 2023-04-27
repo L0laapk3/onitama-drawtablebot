@@ -63,13 +63,13 @@ std::string cardsShortName(Card card, int length) {
 
 std::string Board::toString(const CardsInfo& cards, std::vector<Board> boards, std::vector<char> turnIndicators) {
 	std::string outString = "";
-	constexpr int BOARDS_PER_LINE = 80 / 10;
+	constexpr int BOARDS_PER_LINE = 8;
 
 	for (int i = 0; i < boards.size(); i += BOARDS_PER_LINE) {
 		outString += "\n";
 		for (int j = i; j < i + BOARDS_PER_LINE && j < boards.size(); j++) {
 			auto perm = CARDS_PERMUTATIONS[boards[j].cardI];
-			outString += cardsShortName(cards.cards[perm.playerCards[0][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[0][1]], 4) + " ";
+			outString += cardsShortName(cards.cards[perm.playerCards[0][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[0][1]], 4) + "  ";
 		}
 		outString += "\n";
 
@@ -91,13 +91,13 @@ std::string Board::toString(const CardsInfo& cards, std::vector<Board> boards, s
 					} else if ((board.k[0] | board.k[1]) & mask) outString += "!"; // invalid
 					else                                         outString += ".";
 				}
-				outString += "|" + std::string(1, cardsShortName(cards.cards[perm.sideCard], 5)[r]) + " ";
+				outString += "|" + std::string(1, cardsShortName(cards.cards[perm.sideCard], 5)[r]) + "  ";
 			}
 			outString += "\n";
 		}
 		for (int j = i; j < i + BOARDS_PER_LINE && j < boards.size(); j++) {
 			auto perm = CARDS_PERMUTATIONS[boards[j].cardI];
-			outString += cardsShortName(cards.cards[perm.playerCards[1][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[1][1]], 4) + " ";
+			outString += cardsShortName(cards.cards[perm.playerCards[1][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[1][1]], 4) + "  ";
 		}
 		outString += "\n";
 	}
