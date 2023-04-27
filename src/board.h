@@ -9,6 +9,7 @@
 #include <limits>
 #include <type_traits>
 #include <string>
+#include <span>
 
 
 
@@ -25,10 +26,12 @@ public:
 	// boardUtil.cpp
 	static Board create(bool player = 0, std::array<U32, 2> p = { 0b00000'00000'00000'00000'11111, 0b11111'00000'00000'00000'00000 }, std::array<U32, 2> k = { 0b00000'00000'00000'00000'00100, 0b00100'00000'00000'00000'00000 });
 private:
-	std::string toString(const CardsInfo& cards, char turnIndicator) const;
+	static std::string toString(const CardsInfo& cards, std::vector<Board> boards, std::vector<char> turnIndicators);
 public:
-	std::string toString(const CardsInfo& cards) const;
+	static std::string toString(const CardsInfo& cards, std::vector<Board> boards, std::vector<bool> players);
+	static std::string toString(const CardsInfo& cards, std::vector<Board> boards);
 	std::string toString(const CardsInfo& cards, bool player) const;
+	std::string toString(const CardsInfo& cards) const;
 	void print(const CardsInfo& cards) const;
 	void print(const CardsInfo& cards, bool player) const;
 	Board invert(bool player) const;

@@ -60,38 +60,65 @@ std::string cardsShortName(Card card, int length) {
 		res += card.name.size() > i ? card.name[i] : ' ';
 	return res;
 }
-std::string Board::toString(const CardsInfo& cards, char turnIndicator) const {
+
+std::string Board::toString(const CardsInfo& cards, std::vector<Board> boards, std::vector<char> turnIndicators) {
 	std::string outString = "";
-	auto perm = CARDS_PERMUTATIONS[cardI];
+	constexpr int BOARDS_PER_LINE = 80 / 10;
 
-	outString += "\n" + cardsShortName(cards.cards[perm.playerCards[0][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[0][1]], 4) + "\n";
-
-	auto sideCard = cardsShortName(cards.cards[perm.sideCard], 5);
-	for (int r = 0; r < 5; r++) {
-		outString += std::string(1, r == 4 ? turnIndicator : ' ') + "|";
-
-		for (int c = 5; c --> 0;) {
-			const int mask = 1 << (5 * r + c);
-			if (p[0] & mask) {
-				if ((p[1] | k[1]) & mask)    outString += "?"; // invalid
-				else if (k[0] & mask)        outString += "X";
-				else                         outString += "+";
-			} else if (p[1] & mask) {
-				if (k[1] & mask)             outString += "0";
-				else                         outString += "o";
-			} else if ((k[0] | k[1]) & mask) outString += "!"; // invalid
-			else                             outString += ".";
+	for (int i = 0; i < boards.size(); i += BOARDS_PER_LINE) {
+		outString += "\n";
+		for (int j = i; j < i + BOARDS_PER_LINE && j < boards.size(); j++) {
+			auto perm = CARDS_PERMUTATIONS[boards[j].cardI];
+			outString += cardsShortName(cards.cards[perm.playerCards[0][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[0][1]], 4) + " ";
 		}
-		outString += "|" + std::string(1, sideCard[r]) + "\n";
+		outString += "\n";
+
+		for (int r = 0; r < 5; r++) {
+			for (int j = i; j < i + BOARDS_PER_LINE && j < boards.size(); j++) {
+				auto& board = boards[j];
+				auto perm = CARDS_PERMUTATIONS[board.cardI];
+				outString += std::string(1, r == 4 ? turnIndicators[j] : ' ') + "|";
+
+				for (int c = 5; c --> 0;) {
+					const int mask = 1 << (5 * r + c);
+					if (board.p[0] & mask) {
+						if ((board.p[1] | board.k[1]) & mask)    outString += "?"; // invalid
+						else if (board.k[0] & mask)              outString += "X";
+						else                                     outString += "+";
+					} else if (board.p[1] & mask) {
+						if (board.k[1] & mask)                   outString += "0";
+						else                                     outString += "o";
+					} else if ((board.k[0] | board.k[1]) & mask) outString += "!"; // invalid
+					else                                         outString += ".";
+				}
+				outString += "|" + std::string(1, cardsShortName(cards.cards[perm.sideCard], 5)[r]) + " ";
+			}
+			outString += "\n";
+		}
+		for (int j = i; j < i + BOARDS_PER_LINE && j < boards.size(); j++) {
+			auto perm = CARDS_PERMUTATIONS[boards[j].cardI];
+			outString += cardsShortName(cards.cards[perm.playerCards[1][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[1][1]], 4) + " ";
+		}
+		outString += "\n";
 	}
-	outString += cardsShortName(cards.cards[perm.playerCards[1][0]], 4) + " " + cardsShortName(cards.cards[perm.playerCards[1][1]], 4) + "\n\n";
+	outString += "\n";
 	return outString;
 }
-std::string Board::toString(const CardsInfo& cards) const {
-	return toString(cards, ' ');
-};
+std::string Board::toString(const CardsInfo& cards, std::vector<Board> boards, std::vector<bool> players) {
+	std::vector<char> turnIndicators(players.size());
+	for (int i = 0; i < players.size(); i++)
+		turnIndicators[i] = players[i] ? '0' : 'X';
+	return toString(cards, boards, turnIndicators);
+}
+std::string Board::toString(const CardsInfo& cards, std::vector<Board> boards) {
+	std::vector<char> turnIndicators(boards.size(), ' ');
+	return toString(cards, boards, turnIndicators);
+}
 std::string Board::toString(const CardsInfo& cards, bool player) const {
-	return toString(cards, player ? 'X' : '0');
+	return Board::toString(cards, std::vector<Board>({ *this }), std::vector<bool>({ player }));
+};
+std::string Board::toString(const CardsInfo& cards) const {
+	return Board::toString(cards, std::vector<Board>({ *this }));
 };
 void Board::print(const CardsInfo& cards) const {
 	std::cout << toString(cards);

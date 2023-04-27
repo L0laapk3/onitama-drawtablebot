@@ -25,21 +25,29 @@ int main(int argc, char** argv) {
 
 		bool player = 1;
 		Board board = Board::create(player);
+		std::vector<Board> boards{};
+		std::vector<bool> players{};
 
 		while (true) {
-			board.print(cards);
+			boards.push_back(board);
+			players.push_back(player);
+
+			std::cout << (player ? "0" : "X") << ": ";
 			const auto& result = board.search(cards, 5, player);
 			board = result.board;
 			player = !player;
 			board.recalculateHash(player);
 
 			if (result.winningMove)
-				return 0;
+				break;
 			if (!result.foundMove) {
 				std::cerr << "didnt find any moves" << std::endl;
-				return 1;
+				break;
 			}
 		}
+		boards.push_back(board);
+		players.push_back(player);
+		std::cout << Board::toString(cards, boards, players);
 		return 0;
 	}
 
