@@ -179,20 +179,21 @@ void Connection::waitTurn(Game& game) {
 	U8 cardI = (U8)-1;
 	for (U8 _cardI = 0; _cardI < 30; _cardI++) {
 		auto& perm = CARDS_PERMUTATIONS[_cardI];
-		if (((cards[perm.playerCards[game.player][0]] == game.cards->cards[0].name && cards[perm.playerCards[game.player][1]] == game.cards->cards[0].name) ||
-		     (cards[perm.playerCards[game.player][1]] == game.cards->cards[1].name && cards[perm.playerCards[game.player][0]] == game.cards->cards[1].name)) &&
-		    ((cards[perm.playerCards[!game.player][0]] == game.cards->cards[2].name && cards[perm.playerCards[!game.player][1]] == game.cards->cards[2].name) ||
-		     (cards[perm.playerCards[!game.player][1]] == game.cards->cards[3].name && cards[perm.playerCards[!game.player][0]] == game.cards->cards[3].name)) &&
-		     (cards[perm.sideCard] == game.cards->cards[4].name))
+		if (((cards[0 + 2 * game.player] == std::string(game.cards->cards[perm.playerCards[0][0]].name) && cards[1 + 2 * game.player] == std::string(game.cards->cards[perm.playerCards[0][1]].name)) ||
+		     (cards[1 + 2 * game.player] == std::string(game.cards->cards[perm.playerCards[0][0]].name) && cards[0 + 2 * game.player] == std::string(game.cards->cards[perm.playerCards[0][1]].name))) &&
+		    ((cards[0 + 2 * !game.player] == std::string(game.cards->cards[perm.playerCards[1][0]].name) && cards[1 + 2 * !game.player] == std::string(game.cards->cards[perm.playerCards[1][1]].name)) ||
+		     (cards[1 + 2 * !game.player] == std::string(game.cards->cards[perm.playerCards[1][0]].name) && cards[0 + 2 * !game.player] == std::string(game.cards->cards[perm.playerCards[1][1]].name))) &&
+		     (cards[4] == std::string(game.cards->cards[perm.sideCard].name)))
 			cardI = _cardI;
 	}
-	if (cardI == (U8)-1)
-		throw std::runtime_error("wtf no card found"); // TODO
+	assert(cardI != (U8)-1);
+
+	auto& perm = CARDS_PERMUTATIONS[cardI];
 
 	game.board = parseBoard(boardStr, game.player, !game.myTurn, cardI);
 
 	game.board.recalculateHash(!game.myTurn);
-	game.board.checkValid(*game.cards, game.ended, !game.myTurn);
+	game.board.checkValid(*game.cards, !game.myTurn, game.ended);
 }
 
 std::string indexToPos(U32 i, bool flipped) {

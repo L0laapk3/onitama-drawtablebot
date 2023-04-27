@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
 
 	while (true) {
 		if (game.myTurn) {
-			auto result = game.board.searchTime(*game.cards, 0, 1000);
+			auto result = game.board.searchTime(*game.cards, 1000);
 			conn.submitMove(game, result.board, 0);
 		}
 

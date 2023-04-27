@@ -8,6 +8,7 @@
 
 
 SearchResult Board::search(const CardsInfo& cards, Depth depth, bool player, Score alpha, Score beta, bool print) {
+	assertValid(cards, player);
 	SearchResult result;
 	auto start = std::chrono::high_resolution_clock::now();
 	if (player)
@@ -32,7 +33,7 @@ SearchTimeResult Board::searchTime(const CardsInfo& cards, S64 timeMs, bool play
 	while (depth < 512) {
 		depth++;
 
-		result = search(cards, player, depth, alpha, beta, false);
+		result = search(cards, depth, player, alpha, beta, false);
 		if (result.winningMove)
 			break;
 
