@@ -146,7 +146,7 @@ Connection::LoadResult Connection::load() {
 			Board board = parseBoard(boardStr, player);
 			auto cardsInfo = parseCards(cards, player);
 			board.recalculateHash(player);
-			board.checkValid(cardsInfo);
+			board.checkValid(cardsInfo, player);
 			return {
 				.player = player,
 				.myTurn = myTurn,
@@ -182,7 +182,7 @@ void Connection::waitTurn(Game& game) {
 
 	game.board = parseBoard(boardStr, game.player);
 	game.board.recalculateHash(game.player);
-	game.board.checkValid(*game.cards, game.ended);
+	game.board.checkValid(*game.cards, game.ended, game.player);
 }
 
 std::string indexToPos(U32 i, bool flipped) {

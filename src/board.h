@@ -36,8 +36,8 @@ public:
 	void print(const CardsInfo& cards) const;
 	void print(const CardsInfo& cards, bool player) const;
 	Board invert() const;
-	void checkValid(const CardsInfo& cards, bool isWon = false) const;
-	void assertValid(const CardsInfo& cards, bool isWon = false) const;
+	void checkValid(const CardsInfo& cards, bool player, bool isWon = false) const;
+	void assertValid(const CardsInfo& cards, bool player, bool isWon = false) const;
 	bool operator==(const Board& other) const;
 	void recalculateHash(bool player);
 

@@ -13,6 +13,8 @@ template<bool player, typename Callable>
 inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Callable f) {
 	Board beforeBoard = *this;
 
+	hash ^= ZOBRIST.turn;
+
 	U8 thisCardI = cardI;
 	const auto& moveList = cards.moveBoards[CARDS_HAND[player][cardI]];
 
@@ -57,7 +59,7 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 						cardI = CARDS_SWAP[thisCardI][player][i];
 						hash ^= ZOBRIST.moves[thisCardI][player][i];
 
-						assertValid(cards);
+						assertValid(cards, !player);
 
 						Board beforeBoard2 = *this;
 						cont = f();
@@ -84,13 +86,15 @@ inline void Board::iterateMoves(const CardsInfo& cards, bool quiesence, const Ca
 			p[player] |= sourcePiece;
 			k[player] |= sourceKing;
 
-			assertValid(cards);
+			assertValid(cards, !player);
 		} while (sourceBits && cont);
 		if (!cont || quiesence)
 			break;
 	}
 
 	cardI = thisCardI;
+
+	hash ^= ZOBRIST.turn;
 
 	assume(*this == beforeBoard);
 }

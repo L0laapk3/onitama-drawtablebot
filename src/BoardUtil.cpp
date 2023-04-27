@@ -14,7 +14,7 @@ Board Board::create(std::array<U32, 2> p, std::array<U32, 2> k) {
 }
 
 
-void Board::checkValid(const CardsInfo& cards, bool isWon) const {
+void Board::checkValid(const CardsInfo& cards, bool player, bool isWon) const {
 	auto test = [&](bool result) {
 		if (!result) {
 			std::cout << "Invalid board!" << std::endl;
@@ -40,11 +40,15 @@ void Board::checkValid(const CardsInfo& cards, bool isWon) const {
 	test(k[1] == (p[1] & k[1]));
 	test((p[0] & p[1]) == 0);
 	test(cardI < 30);
+
+	Board tmpBoard = *this;
+	tmpBoard.recalculateHash(player);
+	test(tmpBoard.hash == hash);
 }
 
-void Board::assertValid(const CardsInfo& cards, bool isWon) const {
+void Board::assertValid(const CardsInfo& cards, bool player, bool isWon) const {
 #ifndef NDEBUG
-	checkValid(cards, isWon);
+	checkValid(cards, player, isWon);
 #endif
 }
 

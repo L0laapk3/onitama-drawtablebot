@@ -13,12 +13,12 @@ std::conditional_t<root, SearchResult, Score> Board::search(const CardsInfo& car
 
 	U8 thisCardI = cardI;
 	const auto& moveList = cards.moveBoards[CARDS_HAND[player][cardI]];
-	assertValid(cards);
+	assertValid(cards, player);
 
 	if (isWinInOne<player>(moveList)) {
 		Board board = *this;
 		board.doWinInOne<player>(moveList);
-		board.assertValid(cards, true);
+		board.assertValid(cards, player, true);
 		return SearchResult{ SCORE::WIN, board, true, true };
 	}
 
