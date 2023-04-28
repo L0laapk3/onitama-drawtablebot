@@ -3,6 +3,7 @@
 #include "boardIter.hpp"
 #include "boardEval.hpp"
 #include "game.h"
+#include "transpositionTable.hpp"
 
 
 
@@ -33,21 +34,22 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 			alpha = standing_pat;
 	}
 
+	Transposition* ttWriteEntry;
 	if (!root && depthLeft > 0 && !trackDistance) { // TODO: trackdistance..
-		auto ttEntry = game.tt.get(hash);
-		if (ttEntry.hash) {
-			if (ttEntry.depth >= depthLeft || std::abs(ttEntry.score) >= SCORE::WIN) {
-				if (ttEntry.type == BoundType::EXACT)
-					return SearchResult{ ttEntry.score };
-				if (ttEntry.type == BoundType::LOWER) {
-					if (ttEntry.score > alpha)
-						alpha = ttEntry.score;
+		auto ttReadEntry = game.tt.get(hash);
+		if (ttReadEntry.hash) {
+			if (ttReadEntry.depth >= depthLeft || std::abs(ttReadEntry.score) >= SCORE::WIN) {
+				if (ttReadEntry.move.type == BoundType::EXACT)
+					return SearchResult{ ttReadEntry.score };
+				if (ttReadEntry.move.type == BoundType::LOWER) {
+					if (ttReadEntry.score > alpha)
+						alpha = ttReadEntry.score;
 				} else { // BoundType::UPPER
-					if (ttEntry.score < beta)
-						beta = ttEntry.score;
+					if (ttReadEntry.score < beta)
+						beta = ttReadEntry.score;
 				}
 				if (alpha >= beta)
-					return SearchResult{ ttEntry.score };
+					return SearchResult{ ttReadEntry.score };
 			}
 		}
 	}
@@ -81,16 +83,16 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 		return true;
 	});
 
-	if (depthLeft > 0 && !trackDistance) // TODO: trackdistance..
+	if (depthLeft > 0 && !trackDistance) { // TODO: trackdistance..
+		TranspositionMove move;
+		move.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT;
 		game.tt.put({
 			.hash = hash,
 			.score = alpha,
 			.depth = depthLeft,
-			// .fromBit =
-			// .secondCard =
-			// .toBit =
-			.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT,
+			.move = move,
 		});
+	}
 
 
 	assume(*this == beforeBoard);
