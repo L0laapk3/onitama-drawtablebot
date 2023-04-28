@@ -80,8 +80,8 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, bool player, bool sea
 
 		S64 predictedTime = result.durationUs * std::min((double)result.durationUs / lastDurationUs, (double)lastDurationUs / lastDurationUs2);
 		lastDurationUs2 = lastDurationUs;
-		lastDurationUs = std::max<int>(result.durationUs, 1);
-		if (predictedTime > timeMs * 1500)
+		lastDurationUs = std::max<S64>(result.durationUs, 1);
+		if (predictedTime > timeMs * 1000)
 			break;
 	}
 	printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score, player).c_str(), result.durationUs / 1000);
