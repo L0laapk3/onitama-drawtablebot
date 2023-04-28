@@ -102,7 +102,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	if (1) {
+	if (0) {
 		selfPlay(timeMs);
 		return 0;
 	}
