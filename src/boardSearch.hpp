@@ -36,10 +36,10 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 
 	Transposition* ttWriteEntry;
 	TranspositionMove ttBestMove{};
-	if (!root && depthLeft > 0 && !trackDistance) { // TODO: trackdistance..
+	if (depthLeft > 0) { // TODO: trackdistance..
 		auto ttReadEntry = game.tt.get(hash);
 		if (ttReadEntry.hash) {
-			if (ttReadEntry.depth >= depthLeft || std::abs(ttReadEntry.score) >= SCORE::WIN) {
+			if (!root && !trackDistance && (ttReadEntry.depth >= depthLeft || std::abs(ttReadEntry.score) >= SCORE::WIN)) {
 				if (ttReadEntry.move.type == BoundType::EXACT)
 					return SearchResult{ ttReadEntry.score };
 				if (ttReadEntry.move.type == BoundType::LOWER) {
@@ -92,7 +92,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 		return true;
 	});
 
-	if (depthLeft > 0 && !trackDistance) { // TODO: trackdistance..
+	if (depthLeft > 0 && !root && !trackDistance) { // TODO: trackdistance..
 		bestMove.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT;
 		game.tt.put({
 			.hash  = hash,

@@ -13,7 +13,7 @@ constexpr Depth DEPTH_MAX = 512;
 
 typedef int Score;
 enum SCORE : int {
-	MAX  = std::numeric_limits<int>::max() - 1,
+	MAX  = std::numeric_limits<int>::max() - DEPTH_MAX - 1,
 	WIN  = MAX - DEPTH_MAX - 1,
 	DRAW = 0,
 	LOSS = -WIN,

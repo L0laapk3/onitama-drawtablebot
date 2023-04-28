@@ -35,9 +35,8 @@ constexpr auto GENERATE_ZOBRIST() { // from random.org
 		zobrist.kings[3][i] = zobrist.kings[1][i] ^ zobrist.pawns[0][i];
 	}
 
-	U64 x = 1;
 	for (auto& card : zobrist.cards)
-		card = (x <<= 1); //rand.next();
+		card = rand.next();
 	for (int i = 0; i < 30; i++)
 		for (int j = 0; j < 2; j++)
 			for (int k = 0; k < 2; k++)

@@ -67,7 +67,7 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, bool player, bool sea
 	ScoreParsed parsedScore{};
 	Depth depth = 0;
 
-	S64 lastDurationUs = 1;
+	S64 lastDurationUs = 1, lastDurationUs2 = 1;
 	while (depth < 511) {
 		depth++;
 
@@ -78,9 +78,10 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, bool player, bool sea
 		if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth)
 			break;
 
-		int predictedTime = result.durationUs * result.durationUs / std::max<int>(lastDurationUs, 1);
-		lastDurationUs = result.durationUs;
-		if (predictedTime > timeMs * 1000)
+		S64 predictedTime = result.durationUs * std::min((double)result.durationUs / lastDurationUs, (double)lastDurationUs / lastDurationUs2);
+		lastDurationUs2 = lastDurationUs;
+		lastDurationUs = std::max<int>(result.durationUs, 1);
+		if (predictedTime > timeMs * 1500)
 			break;
 	}
 	printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score, player).c_str(), result.durationUs / 1000);
