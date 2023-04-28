@@ -27,7 +27,7 @@ std::string scoreToString(ScoreParsed parsed, bool player) {
 	if (parsed.outcome != SCORE::DRAW)
 		return std::string((parsed.outcome == SCORE::WIN) != player ? " win" : "lose") + " in " + std::to_string(parsed.outcomeDistance);
 
-	if (!player)
+	if (player)
 		parsed.eval *= -1;
 
 	std::stringstream stream;

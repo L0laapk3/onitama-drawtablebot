@@ -150,7 +150,7 @@ Board Board::invert(bool player) const {
 
 
 bool Board::operator==(const Board& other) const {
-	return p[0] == other.p[0] && p[1] == other.p[1] && k[0] == other.k[0] && k[1] == other.k[1] && cardI == other.cardI;
+	return p[0] == other.p[0] && p[1] == other.p[1] && k[0] == other.k[0] && k[1] == other.k[1] && cardI == other.cardI && hash == other.hash;
 }
 
 

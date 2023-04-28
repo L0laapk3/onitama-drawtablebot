@@ -17,9 +17,11 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 
 	hash ^= ZOBRIST.turn;
 
+	Board beforeBoardFlipped = *this;
+
 	U32 pBest = 0;
-	U32 pFrom = (1 << bestMove.fromBitFull);
-	U32 pTo = (1 << bestMove.toBit);
+	U32 pFrom = 1U << bestMove.fromBitFull;
+	U32 pTo = 1U << bestMove.toBit;
 	U32 pMove = pFrom | pTo;
 	if (bestMove.full) {
 		p[player] ^= pMove;
@@ -27,13 +29,14 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 		U32 kMove = pFrom & k[player] ? pMove : 0;
 		k[player] ^= kMove;
 		U32 pRemoved = p[!player] & pTo;
-		p[!player] &= ~pRemoved;
+		p[!player] ^= pRemoved;
 
 		U64 beforeHash = hash;
 		if (kMove)
-			hash ^= ZOBRIST.kings[player][bestMove.fromBitFull] | ZOBRIST.kings[pRemoved ? 2 + player : player][bestMove.toBit];
+			hash ^= ZOBRIST.kings[player][bestMove.fromBitFull] ^ ZOBRIST.kings[pRemoved ? 2 + player : player][bestMove.toBit];
 		else
-			hash ^= ZOBRIST.pawns[player][bestMove.fromBitFull] | ZOBRIST.pawns[pRemoved ? 2 : player][bestMove.toBit];
+			hash ^= ZOBRIST.pawns[player][bestMove.fromBitFull] ^ ZOBRIST.pawns[pRemoved ? 2 : player][bestMove.toBit];
+
 		hash ^= ZOBRIST.moves[cardI][player][bestMove.secondCard];
 		cardI = CARDS_SWAP[cardI][player][bestMove.secondCard];
 
@@ -41,7 +44,6 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 		Board beforeBoard2 = *this;
 		bool cont = f(bestMove);
 		assume(*this == beforeBoard2);
-		assertValid(*game.cards, !player);
 
 		cardI = thisCardI;
 
@@ -52,8 +54,10 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 
 		hash = beforeHash;
 
+		assume(*this == beforeBoardFlipped);
+
 		if (!cont)
-			return;
+			goto end;
 	}
 
 	const auto& moveList = game.cards->moveBoards[CARDS_HAND[player][cardI]];
@@ -101,7 +105,7 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 				for (int i = 0; i < 2; i++) {
 					if (other || (landPiece & landBitsCards[i])) {
 
-						if (p[player] != pBest || bestMove.secondCard != i) {
+						if (p[player] != pBest || bestMove.secondCard != i) [[likely]] {
 							cardI = CARDS_SWAP[thisCardI][player][i];
 							hash ^= ZOBRIST.moves[thisCardI][player][i];
 
@@ -112,7 +116,6 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 							Board beforeBoard2 = *this;
 							cont = f(ttMove);
 							assume(*this == beforeBoard2);
-							assertValid(*game.cards, !player);
 
 							hash ^= ZOBRIST.moves[thisCardI][player][i];
 
@@ -148,6 +151,7 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 
 	cardI = thisCardI;
 
+end:
 	hash ^= ZOBRIST.turn;
 
 	assume(*this == beforeBoard);

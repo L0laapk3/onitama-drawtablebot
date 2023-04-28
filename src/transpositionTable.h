@@ -16,23 +16,23 @@ enum BoundType : U8 {
 
 struct TranspositionMove {
 	union {
+		U16 full;
 		struct {
 			union {
+				U8 fromBitFull;
 				struct {
 					U8 fromBit     : 6;
 					BoundType type : 2;
 				};
-				U8 fromBitFull;
 			};
 			union {
+				U8 toBitFull;
 				struct {
 					U8 toBit      : 6;
 					U8 secondCard : 1;
 				};
-				U8 toBitFull;
 			};
 		};
-		U16 full;
 	};
 };
 

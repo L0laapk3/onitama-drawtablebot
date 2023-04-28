@@ -14,8 +14,6 @@ constexpr static inline U64 rotl(const U64 x, int k) {
 struct Xoshiro256 {
 	std::array<U64, 4> s;
 
-	// U64 i = 1;
-
 	constexpr U64 next(void) {
 		const U64 result = rotl(s[0] + s[3], 23) + s[0];
 
@@ -30,9 +28,5 @@ struct Xoshiro256 {
 
 		s[3] = rotl(s[3], 45);
 		return result;
-
-		// U64 _i = i;
-		// i <<= 1;
-		// return _i;
 	}
 };
