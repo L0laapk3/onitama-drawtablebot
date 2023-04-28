@@ -9,10 +9,10 @@
 void narrowSearchForWin(ScoreParsed& score, Score& alpha, Score& beta) {
 	if (score.outcome == SCORE::WIN) {
 		beta = SCORE::WIN;
-		alpha = beta - DEPTH_MAX;
+		alpha = beta - (DEPTH_MAX + 1);
 	} else if (score.outcome == SCORE::LOSS) {
 		alpha = SCORE::LOSS;
-		beta = alpha + DEPTH_MAX;
+		beta = alpha + (DEPTH_MAX + 1);
 	}
 }
 

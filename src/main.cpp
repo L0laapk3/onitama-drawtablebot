@@ -15,6 +15,11 @@ void singleSearch() {
 		Board::create(0, { 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 })
 	); // before TT: 6400-6800ms
 
+	game.board.search(game, 9);
+	game.board.search(game, 10);
+	game.board.search(game, 11);
+	game.board.search(game, 12);
+	game.board.search(game, 13);
 	auto result = game.board.search(game, 14);
 	result.board.print(*game.cards);
 }
@@ -90,7 +95,7 @@ int main(int argc, char** argv) {
 	if (0)
 		testMain();
 
-	S64 timeMs = 1000;
+	S64 timeMs = 100;
 
 	if (0) {
 		singleSearch();
