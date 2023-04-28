@@ -35,6 +35,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 	}
 
 	Transposition* ttWriteEntry;
+	TranspositionMove ttBestMove{};
 	if (!root && depthLeft > 0 && !trackDistance) { // TODO: trackdistance..
 		auto ttReadEntry = game.tt.get(hash);
 		if (ttReadEntry.hash) {
@@ -51,16 +52,19 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 				if (alpha >= beta)
 					return SearchResult{ ttReadEntry.score };
 			}
+			ttBestMove = ttReadEntry.move;
+			ttBestMove.fromBitFull = ttBestMove.fromBit; // clear boundType
 		}
 	}
 
 	// TODO: TT bestmove logic
 
+	TranspositionMove bestMove{};
 	Score alphaOrig = alpha;
 	Board nextBoard;
 	bool foundMove = false;
 	Score bestScore = SCORE::MIN;
-	iterateMoves<player>(game, !root && depthLeft <= 0, [&]() {
+	iterateMoves<player>(game, !root && depthLeft <= 0, ttBestMove, [&](TranspositionMove& move) {
 		foundMove = true;
 		Board beforeBoard = *this;
 		Score score = -search<!player, false, trackDistance>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
@@ -75,22 +79,26 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 		}
 		if (score >= beta) {
 			alpha = beta;
+			if (!root && !trackDistance)
+				bestMove = move;
 			return false;
 		}
 
-		if (score > alpha)
+		if (score > alpha) {
 			alpha = score;
+			if (!root && !trackDistance)
+				bestMove = move;
+		}
 		return true;
 	});
 
 	if (depthLeft > 0 && !trackDistance) { // TODO: trackdistance..
-		TranspositionMove move;
-		move.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT;
+		bestMove.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT;
 		game.tt.put({
-			.hash = hash,
+			.hash  = hash,
 			.score = alpha,
 			.depth = depthLeft,
-			.move = move,
+			.move  = bestMove,
 		});
 	}
 

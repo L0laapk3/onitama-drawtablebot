@@ -12,6 +12,7 @@
 #include <span>
 
 
+struct TranspositionMove;
 class Game;
 struct SearchResult;
 struct SearchTimeResult;
@@ -70,7 +71,7 @@ public:
 
 	// boardIter.hpp
 	template<bool player, typename Callable>
-	void iterateMoves(Game& game, bool quiesence, const Callable f);
+	void iterateMoves(Game& game, bool quiesence, TranspositionMove bestMove, const Callable f);
 
 	// boardSearch.hpp
 	template<bool player, bool root = false, bool trackDistance = false>
