@@ -20,12 +20,15 @@ ScoreParsed parseScore(Score score) {
 	return result;
 }
 
-std::string scoreToString(Score score) {
-	return scoreToString(parseScore(score));
+std::string scoreToString(Score score, bool player) {
+	return scoreToString(parseScore(score), player);
 }
-std::string scoreToString(ScoreParsed parsed) {
+std::string scoreToString(ScoreParsed parsed, bool player) {
 	if (parsed.outcome != SCORE::DRAW)
-		return std::string(parsed.outcome == SCORE::WIN ? "win" : "lose") + " in " + std::to_string(parsed.outcomeDistance);
+		return std::string(parsed.outcome == SCORE::WIN ? " win" : "lose") + " in " + std::to_string(parsed.outcomeDistance);
+
+	if (!player)
+		parsed.eval *= -1;
 
 	std::stringstream stream;
 	stream << (parsed.eval > 0 ? "+" : parsed.eval == SCORE::DRAW ? " " : "") << std::fixed << std::setprecision(4) << ((double)parsed.eval / MUL_PIECE_ADVANTAGE);

@@ -17,7 +17,7 @@ void narrowSearchForWin(ScoreParsed& score, Score& alpha, Score& beta) {
 }
 
 
-SearchResult Board::search(const Game& game, Depth depth, bool player, bool searchWin, Score alpha, Score beta, bool print) {
+SearchResult Board::search(Game& game, Depth depth, bool player, bool searchWin, Score alpha, Score beta, bool print) {
 	assertValid(*game.cards, player);
 	SearchResult result;
 	result.durationUs = 0;
@@ -50,7 +50,7 @@ SearchResult Board::search(const Game& game, Depth depth, bool player, bool sear
 	}
 
 	if (print)
-		printf("Depth: %d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score).c_str(), result.durationUs / 1000);
+		printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score, player).c_str(), result.durationUs / 1000);
 
 	if (!result.foundMove)
 		std::cout << "no move found" << std::endl;
@@ -62,7 +62,7 @@ SearchResult Board::search(const Game& game, Depth depth, bool player, bool sear
 
 
 
-SearchTimeResult Board::searchTime(const Game& game, S64 timeMs, bool player, bool searchWin, Score alpha, Score beta) {
+SearchTimeResult Board::searchTime(Game& game, S64 timeMs, bool player, bool searchWin, Score alpha, Score beta) {
 	SearchResult result;
 	ScoreParsed parsedScore{};
 	Depth depth = 0;
@@ -83,7 +83,7 @@ SearchTimeResult Board::searchTime(const Game& game, S64 timeMs, bool player, bo
 		if (predictedTime > timeMs * 1000)
 			break;
 	}
-	printf("Depth: %d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score).c_str(), result.durationUs / 1000);
+	printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score, player).c_str(), result.durationUs / 1000);
 	return {
 		result,
 		depth,

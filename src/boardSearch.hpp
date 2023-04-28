@@ -9,7 +9,7 @@
 // negamax implementation
 // p0 is the maximizer
 template<bool player, bool root, bool trackDistance>
-std::conditional_t<root, SearchResult, Score> Board::search(const Game& game, Score alpha, Score beta, Depth depthLeft) {
+std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score alpha, Score beta, Depth depthLeft) {
 	Board beforeBoard = *this;
 
 	U8 thisCardI = cardI;
@@ -28,13 +28,33 @@ std::conditional_t<root, SearchResult, Score> Board::search(const Game& game, Sc
 	if (!root && depthLeft <= 0) {
 		Score standing_pat = evaluate<player>();
 		if (standing_pat >= beta)
-			return SearchResult{ beta, Board{} };
+			return SearchResult{ beta };
 		if (standing_pat > alpha)
 			alpha = standing_pat;
 	}
 
-	// auto ttEntry =
+	if (!root && depthLeft > 0 && !trackDistance) { // TODO: trackdistance..
+		auto ttEntry = game.tt.get(hash);
+		if (ttEntry.hash) {
+			if (ttEntry.depth >= depthLeft || std::abs(ttEntry.score) >= SCORE::WIN) {
+				if (ttEntry.type == BoundType::EXACT)
+					return SearchResult{ ttEntry.score };
+				if (ttEntry.type == BoundType::LOWER) {
+					if (ttEntry.score > alpha)
+						alpha = ttEntry.score;
+				} else { // BoundType::UPPER
+					if (ttEntry.score < beta)
+						beta = ttEntry.score;
+				}
+				if (alpha >= beta)
+					return SearchResult{ ttEntry.score };
+			}
+		}
+	}
 
+	// TODO: TT bestmove logic
+
+	Score alphaOrig = alpha;
 	Board nextBoard;
 	bool foundMove = false;
 	Score bestScore = SCORE::MIN;
@@ -60,6 +80,18 @@ std::conditional_t<root, SearchResult, Score> Board::search(const Game& game, Sc
 			alpha = score;
 		return true;
 	});
+
+	if (depthLeft > 0 && !trackDistance) // TODO: trackdistance..
+		game.tt.put({
+			.hash = hash,
+			.score = alpha,
+			.depth = depthLeft,
+			// .fromBit =
+			// .secondCard =
+			// .toBit =
+			.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT,
+		});
+
 
 	assume(*this == beforeBoard);
 

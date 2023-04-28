@@ -13,74 +13,75 @@ void singleSearch() {
 	Game game(
 		&CARDS_PERFT,
 		Board::create(0, { 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 })
-	); // before TT: 6426ms
+	); // before TT: 6400-6800ms
 
-	game.board.search(game, 14);
+	auto result = game.board.search(game, 14);
+	result.board.print(*game.cards);
 }
 
 
 
-// void selfPlay() {
-// 	auto& cards = CARDS_PERFT;
+void selfPlay(S64 timeMs) {
+	Game game(
+		&CARDS_PERFT
+	);
 
-// 	bool player = 1;
-// 	Board board = Board::create(player);
-// 	std::vector<Board> boards{};
-// 	std::vector<bool> players{};
+	std::vector<Board> boards{};
+	std::vector<bool> players{};
 
-// 	while (true) {
-// 		boards.push_back(board);
-// 		players.push_back(player);
+	while (true) {
+		boards.push_back(game.board);
+		players.push_back(game.player);
 
-// 		std::cout << (player ? "0" : "X") << ": ";
-// 		const auto& result = board.searchTime(cards, 50, player);
-// 		board = result.board;
-// 		player = !player;
-// 		board.recalculateHash(player);
+		std::cout << (game.player ? "0" : "X") << ": ";
+		const auto& result = game.board.searchTime(game, timeMs, game.player);
+		game.board = result.board;
+		game.player = !game.player;
+		game.board.recalculateHash(game.player);
 
-// 		if (result.winningMove)
-// 			break;
-// 		if (!result.foundMove) {
-// 			std::cerr << "didnt find any moves" << std::endl;
-// 			break;
-// 		}
-// 	}
-// 	boards.push_back(board);
-// 	players.push_back(player);
-// 	std::cout << Board::toString(cards, boards, players);
-// }
+		if (result.winningMove)
+			break;
+		if (!result.foundMove) {
+			std::cerr << "didnt find any moves" << std::endl;
+			break;
+		}
+	}
+	boards.push_back(game.board);
+	players.push_back(game.player);
+	std::cout << Board::toString(*game.cards, boards, players);
+}
 
 
 
-// void onlinePlay(int argc, char** argv) {
-// 	auto conn = Connection();
-// 	if (argc > 1)
-// 		conn.sendJoin(argv[1]);
-// 	else
-// 		conn.sendCreate();
+void onlinePlay(int argc, char** argv, S64 timeMs) {
+	auto conn = Connection();
+	if (argc > 1)
+		conn.sendJoin(argv[1]);
+	else
+		conn.sendCreate();
 
-// 	Game game(conn);
-// 	game.board.assertValid(*game.cards, !game.myTurn);
+	Game game(conn);
+	game.board.assertValid(*game.cards, !game.myTurn);
 
-// 	std::cout << (game.player ? "red" : "blue") << std::endl;
+	std::cout << (game.player ? "red" : "blue") << std::endl;
 
-// 	while (true) {
-// 		// game.board.print(*game.cards, game.myTurn);
-// 		if (game.myTurn) {
-// 			auto result = game.board.searchTime(*game.cards, 50);
-// 			// result.board.print(*game.cards, game.myTurn);
-// 			result.board.checkValid(*game.cards, game.myTurn, result.winningMove);
-// 			conn.submitMove(game, result.board, 0);
-// 		} else
-// 			std:: cout << "-" << std::endl;
+	while (true) {
+		game.board.print(*game.cards, game.myTurn);
+		if (game.myTurn) {
+			auto result = game.board.searchTime(game, timeMs);
+			result.board.print(*game.cards, game.myTurn);
+			result.board.checkValid(*game.cards, game.myTurn, result.winningMove);
+			conn.submitMove(game, result.board, 0);
+		} else
+			std:: cout << "-" << std::endl;
 
-// 		conn.waitTurn(game);
-// 		if (game.ended) {
-// 			std::cout << (!game.myTurn ? "won" : "lost") << std::endl;
-// 			break;
-// 		}
-// 	}
-// }
+		conn.waitTurn(game);
+		if (game.ended) {
+			std::cout << (!game.myTurn ? "won" : "lost") << std::endl;
+			break;
+		}
+	}
+}
 
 
 
@@ -89,18 +90,20 @@ int main(int argc, char** argv) {
 	if (0)
 		testMain();
 
-	if (1) {
+	S64 timeMs = 1000;
+
+	if (0) {
 		singleSearch();
 		return 0;
 	}
 
-	// if (0) {
-	// 	selfPlay();
-	// 	return 0;
-	// }
+	if (1) {
+		selfPlay(timeMs);
+		return 0;
+	}
 
-	// if (1) {
-	// 	onlinePlay(argc, argv);
-	// 	return 0;
-	// }
+	if (1) {
+		onlinePlay(argc, argv, timeMs);
+		return 0;
+	}
 }

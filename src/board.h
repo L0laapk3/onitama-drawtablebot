@@ -70,16 +70,16 @@ public:
 
 	// boardIter.hpp
 	template<bool player, typename Callable>
-	void iterateMoves(const Game& game, bool quiesence, const Callable f);
+	void iterateMoves(Game& game, bool quiesence, const Callable f);
 
 	// boardSearch.hpp
 	template<bool player, bool root = false, bool trackDistance = false>
-	std::conditional_t<root, SearchResult, Score> search(const Game& game, Score alpha, Score beta, Depth depthLeft);
+	std::conditional_t<root, SearchResult, Score> search(Game& game, Score alpha, Score beta, Depth depthLeft);
 
 	// boardSearchTools.cpp
-	SearchResult search(const Game& game, Depth depth, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
-	SearchTimeResult searchTime(const Game& game, S64 timeMs, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN);
-	// SearchTimeResult searchTimeWithPanic(const Game& game, S64 timeMs, bool player = 0, SearchTimeResult& lastResult);
+	SearchResult search(Game& game, Depth depth, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
+	SearchTimeResult searchTime(Game& game, S64 timeMs, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN);
+	// SearchTimeResult searchTimeWithPanic(Game& game, S64 timeMs, bool player = 0, SearchTimeResult& lastResult);
 };
 
 struct SearchResult {

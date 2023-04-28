@@ -10,7 +10,7 @@
 // assumes p0 is to move
 // assumes the board is not a win in 1
 template<bool player, typename Callable>
-inline void Board::iterateMoves(const Game& game, bool quiesence, const Callable f) {
+inline void Board::iterateMoves(Game& game, bool quiesence, const Callable f) {
 	Board beforeBoard = *this;
 
 	hash ^= ZOBRIST.turn;
