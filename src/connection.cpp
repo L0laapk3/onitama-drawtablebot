@@ -92,36 +92,6 @@ void Connection::sendJoin(const std::string& matchId) {
 
 
 
-Board Connection::parseBoard(std::string str, bool flip, bool player, U8 cardI) {
-	Board board{};
-	for (int i = 0; i < 25; i++) {
-		const auto c = str[flip ? 24ULL - i : i];
-		if (c == '1' || c == '2') {
-			board.p[flip] |= 1ULL << i;
-			if (c == '2')
-				board.k[flip] |= 1ULL << i;
-		}
-		if (c == '3' || c == '4') {
-			board.p[!flip] |= 1ULL << i;
-			if (c == '4')
-				board.k[!flip] |= 1ULL << i;
-		}
-	}
-	board.cardI = cardI; // 10 is the one with the cards in order 0, 1, 2, 3, 4
-	board.recalculateHash(player);
-	return board;
-}
-
-CardsInfo Connection::parseCards(std::array<std::string, 5> cardNames, bool flipped) {
-    return CardsInfo::create({
-        findCard(cardNames[flipped ? 2 : 0]),
-        findCard(cardNames[flipped ? 3 : 1]),
-        findCard(cardNames[flipped ? 0 : 2]),
-        findCard(cardNames[flipped ? 1 : 3]),
-        findCard(cardNames[4]),
-    });
-}
-
 Connection::LoadResult Connection::load() {
 	assert(ws->getReadyState() != easywsclient::WebSocket::CLOSED);
 
@@ -130,70 +100,56 @@ Connection::LoadResult Connection::load() {
 		ws->poll(-1);
 		assert(ws->getReadyState() != easywsclient::WebSocket::CLOSED);
 		std::array<std::string, 5> cards;
-		bool myTurn, player;
+		bool redTurn, playerBlue;
 		ws->dispatch([&](const std::string& message) {
 			boardStr = getString(message, "board");
 			if (boardStr.size()) {
-				player = std::stoi(getRegex(message, "\"indices\":[^}]+\"red\":(\\d+)")) == index;
-				cards[0] = getRegex(message, "\"cards\":[^}]+\"blue\":\\[\"([^\"]+)\"");
-				cards[1] = getRegex(message, "\"cards\":[^}]+\"blue\":\\[\"[^\"]+\",\"([^\"]+)\"");
-				cards[2] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"([^\"]+)\"");
-				cards[3] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"[^\"]+\",\"([^\"]+)\"");
+				playerBlue = std::stoi(getRegex(message, "\"indices\":[^}]+\"red\":(\\d+)")) != index;
+				cards[0] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"([^\"]+)\"");
+				cards[1] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"[^\"]+\",\"([^\"]+)\"");
+				cards[2] = getRegex(message, "\"cards\":[^}]+\"blue\":\\[\"([^\"]+)\"");
+				cards[3] = getRegex(message, "\"cards\":[^}]+\"blue\":\\[\"[^\"]+\",\"([^\"]+)\"");
 				cards[4] = getRegex(message, "\"cards\":[^}]+\"side\":\"([^\"]+)\"");
-				myTurn = getString(message, "currentTurn") == (player ? "red" : "blue");
+				redTurn = getString(message, "currentTurn") == "red";
 			}
 		});
 		if (boardStr.size()) {
-			Board board = parseBoard(boardStr, player, !myTurn);
-			auto cardsInfo = parseCards(cards, player);
-			board.checkValid(cardsInfo, !myTurn);
 			return {
-				.player = player,
-				.myTurn = myTurn,
-				.cards = cardsInfo,
-				.board = board,
+				.playerBlue = playerBlue,
+				.redTurn = redTurn,
+				.cardStr = cards,
+				.boardStr = boardStr,
 			};
 		}
 	}
 }
 
-void Connection::waitTurn(Game& game) {
+Connection::LoadResult Connection::waitTurn(bool redTurn) {
 	std::string boardStr = "";
-	bool lastTurn = game.myTurn;
+	bool newRedTurn = redTurn;
+	bool ended, playerBlue;
 	std::array<std::string, 5> cards;
-	while (!boardStr.size() || (lastTurn == game.myTurn)) {
+	while (!boardStr.size() || (newRedTurn == redTurn)) {
 		ws->poll(-1);
 		assert(ws->getReadyState() != easywsclient::WebSocket::CLOSED);
 		ws->dispatch([&](const std::string& message) {
 			boardStr = getString(message, "board");
-			cards[0] = getRegex(message, "\"cards\":[^}]+\"blue\":\\[\"([^\"]+)\"");
-			cards[1] = getRegex(message, "\"cards\":[^}]+\"blue\":\\[\"[^\"]+\",\"([^\"]+)\"");
-			cards[2] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"([^\"]+)\"");
-			cards[3] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"[^\"]+\",\"([^\"]+)\"");
+			cards[0] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"([^\"]+)\"");
+			cards[1] = getRegex(message, "\"cards\":[^}]+\"red\":\\[\"[^\"]+\",\"([^\"]+)\"");
+			cards[2] = getRegex(message, "\"cards\":[^}]+\"blue\":\\[\"([^\"]+)\"");
+			cards[3] = getRegex(message, "\"cards\":[^}]+\"blue\":\\[\"[^\"]+\",\"([^\"]+)\"");
 			cards[4] = getRegex(message, "\"cards\":[^}]+\"side\":\"([^\"]+)\"");
-			game.myTurn = getString(message, "currentTurn") == (game.player ? "red" : "blue");
-			game.ended = getString(message, "gameState") == "ended";
+			newRedTurn = getString(message, "currentTurn") == "red";
+			ended = getString(message, "gameState") == "ended";
 		});
 	}
 
-	U8 cardI = (U8)-1;
-	for (U8 _cardI = 0; _cardI < 30; _cardI++) {
-		auto& perm = CARDS_PERMUTATIONS[_cardI];
-		if (((cards[0 + 2 * game.player] == std::string(game.cards->cards[perm.playerCards[0][0]].name) && cards[1 + 2 * game.player] == std::string(game.cards->cards[perm.playerCards[0][1]].name)) ||
-		     (cards[1 + 2 * game.player] == std::string(game.cards->cards[perm.playerCards[0][0]].name) && cards[0 + 2 * game.player] == std::string(game.cards->cards[perm.playerCards[0][1]].name))) &&
-		    ((cards[0 + 2 * !game.player] == std::string(game.cards->cards[perm.playerCards[1][0]].name) && cards[1 + 2 * !game.player] == std::string(game.cards->cards[perm.playerCards[1][1]].name)) ||
-		     (cards[1 + 2 * !game.player] == std::string(game.cards->cards[perm.playerCards[1][0]].name) && cards[0 + 2 * !game.player] == std::string(game.cards->cards[perm.playerCards[1][1]].name))) &&
-		     (cards[4] == std::string(game.cards->cards[perm.sideCard].name)))
-			cardI = _cardI;
-	}
-	assert(cardI != (U8)-1);
-
-	auto& perm = CARDS_PERMUTATIONS[cardI];
-
-	game.board = parseBoard(boardStr, game.player, !game.myTurn, cardI);
-
-	game.board.recalculateHash(!game.myTurn);
-	game.board.checkValid(*game.cards, !game.myTurn, game.ended);
+	return {
+		.redTurn = newRedTurn,
+		.ended = ended,
+		.cardStr = cards,
+		.boardStr = boardStr,
+	};
 }
 
 std::string indexToPos(U32 i, bool flipped) {
@@ -201,12 +157,12 @@ std::string indexToPos(U32 i, bool flipped) {
 	return (flipped ? "edcba" : "abcde")[i % 5] + std::to_string((flipped ? 24 - i : i) / 5 + 1);
 }
 
-void Connection::submitMove(Game& game, const Board& board, bool flipped) {
-	U32 from = _tzcnt_u32(game.board.p[flipped] & ~board.p[flipped]);
-	U32 to   = _tzcnt_u32(board.p[flipped] & ~game.board.p[flipped]);
-	auto permutation = CARDS_PERMUTATIONS[board.cardI];
-	const Card& card = game.cards->cards[permutation.sideCard];
-	const std::string moveStr = std::string(card.name) + ' ' + indexToPos(from, game.player != flipped) + indexToPos(to, game.player != flipped);
-	// std::cout << "move " << moveStr << std::endl;
+void Connection::submitMove(const CardSet& cards, const Board& prevBoard, const Board& nextBoard, bool player, bool flipped) {
+	U32 from = _tzcnt_u32(prevBoard.p[player] & ~nextBoard.p[player]);
+	U32 to   = _tzcnt_u32(nextBoard.p[player] & ~prevBoard.p[player]);
+	auto permutation = CARDS_PERMUTATIONS[nextBoard.cardI];
+	const Card& card = cards[permutation.sideCard];
+	const std::string moveStr = std::string(card.name) + ' ' + indexToPos(from, player != flipped) + indexToPos(to, player != flipped);
+	std::cout << "move " << moveStr << std::endl;
 	ws->send("move " + matchId + ' ' + token + ' ' + moveStr);
 }

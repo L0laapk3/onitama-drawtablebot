@@ -3,6 +3,7 @@
 #include "easywsclient.hpp"
 #include <memory>
 #include <array>
+#include <string>
 
 #include "board.h"
 #include "card.hpp"
@@ -16,21 +17,19 @@ public:
 	Connection(std::string matchId);
 	~Connection();
 
-	static CardsInfo parseCards(std::array<std::string, 5> cardNames, bool flipped);
-	static Board parseBoard(std::string str, bool flip, bool player, U8 cardI = 10);
-
 	void sendCreate();
 	void sendJoin(const std::string& matchId);
 
 	struct LoadResult {
-		bool player;
-		bool myTurn;
-		CardsInfo cards;
-		Board board;
+		bool playerBlue;
+		bool redTurn;
+		bool ended = false;
+		std::array<std::string, 5> cardStr;
+		std::string boardStr;
 	};
 	LoadResult load();
-	void waitTurn(Game& game);
-	void submitMove(Game& game, const Board& board, bool flipped);
+	LoadResult waitTurn(bool redTurn);
+	void submitMove(const CardSet& cards, const Board& prevBoard, const Board& nextBoard, bool player, bool flipped);
 
 	std::string matchId;
 	std::string token;

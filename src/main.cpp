@@ -66,21 +66,20 @@ void onlinePlay(int argc, char** argv, S64 timeMs) {
 		conn.sendCreate();
 
 	Game game(conn);
-	game.board.assertValid(*game.cards, !game.myTurn);
 
-	std::cout << (game.player ? "red" : "blue") << std::endl;
+	std::cout << (game.player ? "blue" : "red") << std::endl;
 
 	while (true) {
-		game.board.print(*game.cards, game.myTurn);
+		game.board.print(*game.cards, !game.myTurn);
 		if (game.myTurn) {
 			auto result = game.board.searchTime(game, timeMs);
 			result.board.print(*game.cards, game.myTurn);
 			result.board.checkValid(*game.cards, game.myTurn, result.winningMove);
-			conn.submitMove(game, result.board, 0);
+			game.submitMove(conn, result.board);
 		} else
 			std:: cout << "-" << std::endl;
 
-		conn.waitTurn(game);
+		game.waitTurn(conn);
 		if (game.ended) {
 			std::cout << (!game.myTurn ? "won" : "lost") << std::endl;
 			break;
