@@ -4,6 +4,7 @@
 #include "connection.h"
 #include "game.h"
 #include "test/testMain.h"
+#include "score.h"
 
 #include <iostream>
 
@@ -13,14 +14,11 @@ void singleSearch() {
 	Game game(
 		&CARDS_PERFT,
 		Board::create(0, { 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 })
-	); // before TT: 6400-6800ms
+	);
 
-	game.board.search(game, 9);
-	game.board.search(game, 10);
-	game.board.search(game, 11);
-	game.board.search(game, 12);
-	game.board.search(game, 13);
-	auto result = game.board.search(game, 14);
+	// before aspiration windows: 6700ms
+
+	SearchResult result = game.board.searchTime(game, 9999999999, 17);
 	result.board.print(*game.cards);
 }
 
@@ -34,15 +32,19 @@ void selfPlay(S64 timeMs) {
 	std::vector<Board> boards{};
 	std::vector<bool> players{};
 
+	Score lastScore = 0;
+	Depth lastDepth = 1;
 	while (true) {
 		boards.push_back(game.board);
 		players.push_back(game.player);
 
 		std::cout << (game.player ? "0" : "X") << ": ";
-		const auto& result = game.board.searchTime(game, timeMs, game.player);
+		const auto& result = game.board.searchTime(game, timeMs, DEPTH_MAX, game.player, lastScore, lastDepth);
 		game.board = result.board;
 		game.player = !game.player;
 		game.board.recalculateHash(game.player);
+		lastScore = -result.score; // negate because simulation both players
+		lastDepth = result.depth - 1; // only subtract 1 because simulates both players
 
 		if (result.winningMove)
 			break;
@@ -69,15 +71,21 @@ void onlinePlay(int argc, char** argv, S64 timeMs) {
 
 	std::cout << (game.player ? "blue" : "red") << std::endl;
 
+	Score lastScore = 0;
+	Depth lastDepth = 1;
 	while (true) {
-		game.board.print(*game.cards, !game.myTurn);
+		// game.board.print(*game.cards, !game.myTurn);
 		if (game.myTurn) {
-			auto result = game.board.searchTime(game, timeMs);
-			result.board.print(*game.cards, game.myTurn);
+			auto result = game.board.searchTime(game, timeMs, DEPTH_MAX, 0, lastScore, lastDepth);
+			// result.board.print(*game.cards, game.myTurn);
 			result.board.checkValid(*game.cards, game.myTurn, result.winningMove);
 			game.submitMove(conn, result.board);
-		} else
-			std:: cout << "-" << std::endl;
+
+			lastScore = result.score;
+			lastDepth = result.depth - 2;
+		} else {
+			// std:: cout << "-" << std::endl;
+		}
 
 		game.waitTurn(conn);
 		if (game.ended) {

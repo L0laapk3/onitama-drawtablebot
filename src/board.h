@@ -12,6 +12,7 @@
 #include <span>
 
 
+
 struct TranspositionMove;
 class Game;
 struct SearchResult;
@@ -79,7 +80,7 @@ public:
 
 	// boardSearchTools.cpp
 	SearchResult search(Game& game, Depth depth, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
-	SearchTimeResult searchTime(Game& game, S64 timeMs, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN);
+	SearchTimeResult searchTime(Game& game, S64 timeMs, Depth maxDepth = DEPTH_MAX, bool player = 0, Score lastScore = 0, Depth lastDepth = 1);
 	// SearchTimeResult searchTimeWithPanic(Game& game, S64 timeMs, bool player = 0, SearchTimeResult& lastResult);
 };
 

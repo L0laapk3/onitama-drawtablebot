@@ -163,6 +163,6 @@ void Connection::submitMove(const CardSet& cards, const Board& prevBoard, const 
 	auto permutation = CARDS_PERMUTATIONS[nextBoard.cardI];
 	const Card& card = cards[permutation.sideCard];
 	const std::string moveStr = std::string(card.name) + ' ' + indexToPos(from, player != flipped) + indexToPos(to, player != flipped);
-	std::cout << "move " << moveStr << std::endl;
+	// std::cout << "move " << moveStr << std::endl;
 	ws->send("move " + matchId + ' ' + token + ' ' + moveStr);
 }
