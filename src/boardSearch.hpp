@@ -65,23 +65,31 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 	bool foundMove = false;
 	Score bestScore = SCORE::MIN;
 	iterateMoves<player>(game, !root && depthLeft <= 0, ttBestMove, [&](TranspositionMove& move) {
-		foundMove = true;
 		Board beforeBoard = *this;
-		Score score = -search<!player, false, trackDistance>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
+
 		// trackDistance: widen the search window so we can subtract one again to penalize for distance
+		Score alphaAdj = alpha + (alpha >= 0 ? trackDistance : -trackDistance);
+		Score betaAdj = beta + (beta >= 0 ? trackDistance : -trackDistance);
+
+		Score score;
+		if (!foundMove)
+			goto fullSearch;
+		score = -search<!player, false, trackDistance>(game, -alphaAdj - 1, -alphaAdj, depthLeft - 1);
+		if (alphaAdj < score && score < betaAdj)
+		fullSearch:
+			score = -search<!player, false, trackDistance>(game, -betaAdj, -alphaAdj, depthLeft - 1);
 
 		if (trackDistance) // move score closer to zero for every move
 			score -= score >= 0 ? 1 : -1;
 
+		foundMove = true;
+
+
+		assume(alpha <= beta);
+
 		if (root && score > bestScore) {
 			nextBoard = *this;
 			bestScore = score;
-		}
-		if (score >= beta) {
-			alpha = beta;
-			if (!root && !trackDistance)
-				bestMove = move;
-			return false;
 		}
 
 		if (score > alpha) {
@@ -89,6 +97,8 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 			if (!root && !trackDistance)
 				bestMove = move;
 		}
+		if (score >= beta)
+			return false;
 		return true;
 	});
 
