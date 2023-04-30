@@ -110,7 +110,7 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, Depth maxDepth, bool 
 		S64 predictedTime = result.durationUs * std::max(((double)result.durationUs) / lastDurationUs, ((double)lastDurationUs) / lastDurationUs2);
 		lastDurationUs2 = lastDurationUs;
 		lastDurationUs = std::max<S64>(result.durationUs, 1);
-		if (result.durationUs > timeMs * 1000 / 3) // 3 is an arbitrary estimation of the increased branching factor from next iteration depth
+		if (result.durationUs > timeMs * 1000 / 2) // 2 is an arbitrary estimation of the increased branching factor from next iteration depth
 			break;
 	}
 stopSearch:
