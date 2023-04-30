@@ -10,8 +10,8 @@
 
 // assumes p0 is to move
 // assumes the board is not a win in 1
-template<bool player, typename Callable>
-inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove bestMove, const Callable f) {
+template<bool player, bool quiescence, typename Callable>
+inline void Board::iterateMoves(Game& game, TranspositionMove bestMove, const Callable f) {
 	Board beforeBoard = *this;
 	U8 thisCardI = cardI;
 
@@ -143,7 +143,7 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 				tmpBoard.assertValid(*game.cards, !player);
 	#endif
 			} while (sourceBits && cont);
-			if (!cont || quiesence)
+			if (!cont || quiescence)
 				break;
 		}
 

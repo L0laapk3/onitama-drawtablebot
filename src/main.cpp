@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 
 	S64 timeMs = 100;
 
-	if (0) {
+	if (1) {
 		singleSearch();
 		return 0;
 	}
