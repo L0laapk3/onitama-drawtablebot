@@ -43,24 +43,24 @@ Game::Game(const Connection::LoadResult loadResult) : Game(loadResult.cardStr, l
 
 // leak some memory, whatever
 Game::Game(std::array<std::string, 5> cardNames, std::string boardString, bool player, bool p0Turn) :
-	Game(new CardsInfo(parseCards(cardNames, player)), parseBoard(boardString, !player, player == p0Turn), player, player != p0Turn) { }
+	Game(new CardsInfo(parseCards(cardNames, player)), parseBoard(boardString, !player, player == p0Turn), 0, player != p0Turn, player) { }
 
-Game::Game(const CardsInfo* cards, const Board& board, bool player, bool myTurn) : cards(cards), board(board), player(player), myTurn(myTurn), tt() {
+Game::Game(const CardsInfo* cards, const Board& board, bool player, bool myTurn, bool serverPlayer) : cards(cards), board(board), player(player), myTurn(myTurn), serverPlayer(serverPlayer), tt() {
 	board.assertValid(*cards, !myTurn);
 }
 
 
 
 void Game::waitTurn(Connection& connection) {
-	auto result = connection.waitTurn(myTurn != player);
+	auto result = connection.waitTurn(myTurn != serverPlayer);
 
 	U8 cardI = (U8)-1;
 	for (U8 _cardI = 0; _cardI < 30; _cardI++) {
 		auto& perm = CARDS_PERMUTATIONS[_cardI];
-		if (((result.cardStr[0 + 2 * player] == std::string(cards->cards[perm.playerCards[0][0]].name) && result.cardStr[1 + 2 * player] == std::string(cards->cards[perm.playerCards[0][1]].name)) ||
-		     (result.cardStr[1 + 2 * player] == std::string(cards->cards[perm.playerCards[0][0]].name) && result.cardStr[0 + 2 * player] == std::string(cards->cards[perm.playerCards[0][1]].name))) &&
-		    ((result.cardStr[0 + 2 * !player] == std::string(cards->cards[perm.playerCards[1][0]].name) && result.cardStr[1 + 2 * !player] == std::string(cards->cards[perm.playerCards[1][1]].name)) ||
-		     (result.cardStr[1 + 2 * !player] == std::string(cards->cards[perm.playerCards[1][0]].name) && result.cardStr[0 + 2 * !player] == std::string(cards->cards[perm.playerCards[1][1]].name))) &&
+		if (((result.cardStr[0 + 2 * serverPlayer] == std::string(cards->cards[perm.playerCards[0][0]].name) && result.cardStr[1 + 2 * serverPlayer] == std::string(cards->cards[perm.playerCards[0][1]].name)) ||
+		     (result.cardStr[1 + 2 * serverPlayer] == std::string(cards->cards[perm.playerCards[0][0]].name) && result.cardStr[0 + 2 * serverPlayer] == std::string(cards->cards[perm.playerCards[0][1]].name))) &&
+		    ((result.cardStr[0 + 2 * !serverPlayer] == std::string(cards->cards[perm.playerCards[1][0]].name) && result.cardStr[1 + 2 * !serverPlayer] == std::string(cards->cards[perm.playerCards[1][1]].name)) ||
+		     (result.cardStr[1 + 2 * !serverPlayer] == std::string(cards->cards[perm.playerCards[1][0]].name) && result.cardStr[0 + 2 * !serverPlayer] == std::string(cards->cards[perm.playerCards[1][1]].name))) &&
 		     (result.cardStr[4] == std::string(cards->cards[perm.sideCard].name)))
 			cardI = _cardI;
 	}
@@ -69,13 +69,13 @@ void Game::waitTurn(Connection& connection) {
 	auto& perm = CARDS_PERMUTATIONS[cardI];
 
 	ended = result.ended;
-	myTurn = player != result.redTurn;
-	board = parseBoard(result.boardStr, !player, !myTurn, cardI);
+	myTurn = serverPlayer != result.redTurn;
+	board = parseBoard(result.boardStr, !serverPlayer, !myTurn, cardI);
 	board.checkValid(*cards, !myTurn, ended);
 }
 
 
 
 void Game::submitMove(Connection& connection, Board& nextBoard) {
-	connection.submitMove(cards->cards, board, nextBoard, 0, !player);
+	connection.submitMove(cards->cards, board, nextBoard, 0, !serverPlayer);
 }

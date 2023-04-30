@@ -78,7 +78,7 @@ void onlinePlay(int argc, char** argv, S64 timeMs) {
 
 	SearchPersistent persistent{};
 	while (true) {
-		game.board.print(*game.cards, !game.myTurn);
+		// game.board.print(*game.cards, !game.myTurn);
 		if (game.myTurn) {
 			auto result = game.searchTime({ .time = timeMs }, persistent);
 			// result.board.print(*game.cards, game.myTurn);
@@ -111,9 +111,9 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	S64 timeMs = 1000;
+	S64 timeMs = 100;
 
-	if (1) {
+	if (0) {
 		selfPlay(timeMs);
 		return 0;
 	}

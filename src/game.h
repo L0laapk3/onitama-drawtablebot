@@ -39,7 +39,7 @@ class Game {
 public:
 	// game.cpp
 	Game(std::array<std::string, 5> cardNames, std::string boardString = "1121100000000000000033433", bool player = 0, bool flipped = false);
-	Game(const CardsInfo* cards, const Board& board = parseBoard("1121100000000000000033433", false, 0), bool player = 0, bool p0Turn = 1);
+	Game(const CardsInfo* cards, const Board& board = parseBoard("1121100000000000000033433", false, 0), bool player = 0, bool p0Turn = 1, bool serverPlayer = 0);
 	Game(const Connection::LoadResult loadResult);
 	Game(Connection& connection);
 
@@ -51,6 +51,7 @@ public:
 	TranspositionTableWrapper tt;
 
 	bool player = 0;
+	bool serverPlayer = 0;
 	bool myTurn = 1;
 	bool ended = false;
 	// U32 turnCount = 0;
