@@ -39,7 +39,7 @@ void selfPlay(S64 timeMs) {
 		boards.push_back(game.board);
 		players.push_back(game.player);
 
-		std::cout << (game.player ? "0" : "X") << ": ";
+		// std::cout << (game.player ? "0" : "X") << ": ";
 		const auto& result = game.searchTime({ .time = timeMs }, persistent);
 		// result.board.print(*game.cards, game.player);
 		game.board = result.board;
@@ -50,7 +50,6 @@ void selfPlay(S64 timeMs) {
 		persistent.alpha = -persistent.alpha;
 		persistent.beta  = -persistent.beta;
 		persistent.lastScore = -result.score; // negate because simulation both players
-		persistent.lastDepth = result.depth - 1; // only subtract 1 because simulates both players
 
 		if (result.winningMove)
 			break;
@@ -87,7 +86,7 @@ void onlinePlay(int argc, char** argv, S64 timeMs) {
 			game.submitMove(conn, result.board);
 
 			persistent.lastScore = result.score;
-			persistent.lastDepth = result.depth - 2;
+			persistent.lastDepth--; // skip a move
 		} else {
 			// std:: cout << "-" << std::endl;
 		}
@@ -112,7 +111,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	S64 timeMs = 100;
+	S64 timeMs = 1000;
 
 	if (1) {
 		selfPlay(timeMs);

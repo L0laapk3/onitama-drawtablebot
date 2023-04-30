@@ -22,35 +22,20 @@ void narrowSearchForWin(ScoreParsed& score, Score& alpha, Score& beta) {
 SearchResult Game::search(Depth depth, bool searchWin, Score alpha, Score beta, bool print) {
 	board.assertValid(*cards, player);
 	SearchResult result;
-	result.durationUs = 0;
-
+	auto start = std::chrono::high_resolution_clock::now();
 	if (!searchWin) {
-		auto start = std::chrono::high_resolution_clock::now();
 		if (player)
 			(RootResult&)result = board.search<1, true>(*this, alpha, beta, depth);
 		else
 			(RootResult&)result = board.search<0, true>(*this, alpha, beta, depth);
-		auto end = std::chrono::high_resolution_clock::now();
-		result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-
-		auto parsed = parseScore(result.score);
-		if (parsed.outcome != SCORE::DRAW) {
-			searchWin = true;
- 			// narrowSearchForWin(parsed, alpha, beta);
-		}
-	}
-
-	if (searchWin) {
-		// search again and care about win distance
-		auto prevDuration = result.durationUs;
-		auto start = std::chrono::high_resolution_clock::now();
+	} else {
 		if (player)
 			(RootResult&)result = board.search<1, true, true>(*this, alpha, beta, depth);
 		else
 			(RootResult&)result = board.search<0, true, true>(*this, alpha, beta, depth);
-		auto end = std::chrono::high_resolution_clock::now();
-		result.durationUs = prevDuration + std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	}
+	auto end = std::chrono::high_resolution_clock::now();
+	result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
 	if (print)
 		printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score, player).c_str(), result.durationUs / 1000);
@@ -69,43 +54,51 @@ SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& per
 	SearchTimeResult result;
 	ScoreParsed parsedScore{}, lastParsed = parseScore(persistent.lastScore);
 
-	Depth depth = persistent.lastDepth;
-	bool lastIsMate = lastParsed.outcome != SCORE::DRAW;
-	if (lastIsMate) {
-		depth--; // 1 less depth, we don't need to search the next depth if its a forced loss/win
-	}
+	bool searchWin = lastParsed.outcome != SCORE::DRAW;
 	// printf("alpha: %s, beta: %s\n", scoreToString(alpha).c_str(), scoreToString(beta).c_str());
 
 	S64 lastDurationUs = 1, lastDurationUs2 = 1;
 	bool widenedAspirationWindow = false;
+	Depth depth = persistent.lastDepth;
 	while (depth < stop.depth) {
 		depth++;
 		while (true) {
-			// printf("window: [%s, %s]\n", scoreToString(persistent.alpha).c_str(), scoreToString(persistent.beta).c_str());
-			(SearchResult&)result = search(depth, parsedScore.outcome != SCORE::DRAW || lastParsed.outcome != SCORE::DRAW, persistent.alpha, persistent.beta, false);
-			if (result.winningMove)
-				goto stopSearch;
-			parsedScore = parseScore(result.score);
-			if (parsedScore.outcome != SCORE::DRAW) {
-				if (!lastIsMate) {
-					// narrowSearchForWin(parsedScore, persistent.alpha, persistent.beta);
-					lastIsMate = true;
+			while (true) {
+				// printf("window: [%s, %s], win: %d\n", scoreToString(persistent.alpha).c_str(), scoreToString(persistent.beta).c_str(), searchWin);
+				(SearchResult&)result = search(depth, searchWin, persistent.alpha, persistent.beta, false);
+				parsedScore = parseScore(result.score);
+				if ((parsedScore.outcome != SCORE::DRAW) != searchWin) {
+					// switch from/to mate search mode
+					searchWin = parsedScore.outcome != SCORE::DRAW;
+					// std::cout << "depth: " << depth << " switching search for win: " << searchWin << " score: " << scoreToString(result.score, player) << std::endl;
+					tt.markRecalculateScore(searchWin);
+					continue;
 				}
-				if (parsedScore.outcomeDistance <= depth + 1)
+				if (result.winningMove)
 					goto stopSearch;
+				// if (parsedScore.outcome != SCORE::DRAW)
+				// 	std::cout << "depth " << depth << ": found mate in " << parsedScore.outcomeDistance << std::endl;
+				if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth + 1) {
+					persistent.lastDepth = parsedScore.outcomeDistance - 2; // limit next search depth to mate distance
+					// std::cout << "stop at " << persistent.lastDepth << std::endl;
+					goto stopSearchNoDepthSet;
+				}
+				break;
 			}
 
 			if (result.score <= persistent.alpha) {
 				if (!widenedAspirationWindow && persistent.alpha > -MUL_PIECE_ADVANTAGE)
 					persistent.alpha -= MUL_PIECE_ADVANTAGE;
-				else
+				else {
 					persistent.alpha = SCORE::LOSS;
+				}
 				widenedAspirationWindow = true;
 			} else if (result.score >= persistent.beta) {
 				if (!widenedAspirationWindow && persistent.beta < MUL_PIECE_ADVANTAGE)
 					persistent.beta += MUL_PIECE_ADVANTAGE;
-				else
+				else {
 					persistent.beta = SCORE::WIN;
+				}
 				widenedAspirationWindow = true;
 			} else
 				break;
@@ -120,7 +113,10 @@ SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& per
 			break;
 	}
 stopSearch:
-	printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score).c_str(), result.durationUs / 1000);
+	persistent.lastDepth = depth;
+stopSearchNoDepthSet:
+	persistent.lastDepth--; // next search: one less depth
+	printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score, player).c_str(), result.durationUs / 1000);
 	return {
 		result,
 		depth,

@@ -38,7 +38,7 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 	if constexpr (!quiescence) {
 		const Transposition* ttReadEntry;
 		if (game.tt.get(hash, ttReadEntry)) {
-			if constexpr (!root && !trackDistance) { // todo: trackDistance
+			if constexpr (!root) {
 				if ((ttReadEntry->depth >= depthLeft || std::abs(ttReadEntry->score) >= SCORE::WIN))
 					if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? BoundType::LOWER : BoundType::UPPER))
 						return ttReadEntry->score;
@@ -58,11 +58,10 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 		foundMove = true;
 		Board beforeBoard = *this;
 		Score score;
-		if (quiescence || depthLeft - 1 <= 0)
+		if (quiescence || depthLeft - 1 <= 0) // trackDistance: widen the search window so we can subtract one again to penalize for distance
 			score = -search<!player, false, trackDistance, true>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), 0);
 		else
 			score = -search<!player, false, trackDistance, false>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
-		// trackDistance: widen the search window so we can subtract one again to penalize for distance
 
 		if (trackDistance) // move score closer to zero for every move
 			score -= score >= 0 ? 1 : -1;
@@ -73,20 +72,20 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 		}
 		if (score >= beta) {
 			alpha = beta;
-			if (!root && !trackDistance)
+			if (!root)
 				bestMove = move;
 			return false;
 		}
 
 		if (score > alpha) {
 			alpha = score;
-			if (!root && !trackDistance)
+			if (!root)
 				bestMove = move;
 		}
 		return true;
 	});
 
-	if (!quiescence && !root && !trackDistance) { // TODO: trackdistance..
+	if (!quiescence && !root) {
 		bestMove.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT;
 		game.tt.put({
 			.depth = depthLeft,

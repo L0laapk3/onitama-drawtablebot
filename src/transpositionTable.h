@@ -65,4 +65,5 @@ public:
 	void put(Transposition transposition);
 
 	void markRecalculate();
+	void markRecalculateScore(bool newSearchWin);
 };
