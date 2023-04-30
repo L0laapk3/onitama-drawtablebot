@@ -20,8 +20,8 @@ void TranspositionTableWrapper::markRecalculateScore(bool newSearchWin) {
 	Transposition* it = &table.front().depthPreferred - 1;
 	while (it++ != &table.back().replaceAlways) {
 		if (it->hash) {
-			if (std::abs(it->score) >= SCORE::WIN - DEPTH_MAX - 1 && it->move.type != BoundType::NONE) { // affect all boards that have win states
-				it->move.type = newSearchWin ? BoundType::EXACT : it->score > 0 ? BoundType::LOWER : BoundType::UPPER;
+			if (std::abs(it->score) >= SCORE::WIN - DEPTH_MAX - 1 && it->move.type != Bound::NONE) { // affect all boards that have win states
+				it->move.type = newSearchWin ? Bound::EXACT : it->score > 0 ? Bound::LOWER : Bound::UPPER;
 				it->score = (it->score > 0 ? 1 : -1) * (SCORE::WIN - (newSearchWin ? DEPTH_MAX + 1 : 0));
 				it->depth = 0; // mark for recalculation
 			}

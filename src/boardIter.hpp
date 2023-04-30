@@ -18,6 +18,7 @@ inline void Board::iterateMoves(Game& game, TranspositionMove bestMove, const Ca
 	hash ^= ZOBRIST.turn;
 
 	Board beforeBoardFlipped = *this;
+	const auto& moveList = game.cards->moveBoards[CARDS_HAND[player][cardI]];
 
 	U32 pBest = 0;
 	if (!quiescence) {
@@ -25,6 +26,10 @@ inline void Board::iterateMoves(Game& game, TranspositionMove bestMove, const Ca
 		U32 pTo = 1U << bestMove.toBit;
 		U32 pMove = pFrom | pTo;
 		if (bestMove.full) {
+			// if (!(pFrom & p[player]) || !(pTo & moveList[bestMove.fromBitFull].flip[player].cards[bestMove.secondCard])) // TODO: maybe do something with this
+			// 	std::cout << "shit ass bitch ass collision" << std::endl;
+
+
 			p[player] ^= pMove;
 			pBest = p[player];
 			U32 kMove = pFrom & k[player] ? pMove : 0;
@@ -63,8 +68,6 @@ inline void Board::iterateMoves(Game& game, TranspositionMove bestMove, const Ca
 	}
 
 	{
-		const auto& moveList = game.cards->moveBoards[CARDS_HAND[player][cardI]];
-
 		bool cont = true;
 		#pragma unroll
 		for (int quiet = 0; quiet < 2; quiet++) {

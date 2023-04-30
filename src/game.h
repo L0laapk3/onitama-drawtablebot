@@ -12,7 +12,7 @@
 
 
 struct SearchStopCriteria {
-	S64 time    = std::numeric_limits<S64>::max();
+	S64 time    = 1000 * 60 * 24 * 365;
 	Depth depth = DEPTH_MAX;
 };
 

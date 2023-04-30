@@ -38,9 +38,10 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 	if constexpr (!quiescence) {
 		const Transposition* ttReadEntry;
 		if (game.tt.get(hash, ttReadEntry)) {
-			if constexpr (!root) {
-				if ((ttReadEntry->depth >= depthLeft || std::abs(ttReadEntry->score) >= SCORE::WIN))
-					if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? BoundType::LOWER : BoundType::UPPER))
+			if constexpr (!root && !trackDistance) {
+				// TT cutoff copied from stockfish - works much better than wikipedia/chessprogramming's version
+				if (ttReadEntry->depth > depthLeft - (ttReadEntry->move.type == Bound::EXACT) || std::abs(ttReadEntry->score) >= SCORE::WIN)
+					if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? Bound::LOWER : Bound::UPPER))
 						return ttReadEntry->score;
 			}
 			ttBestMove = ttReadEntry->move;
@@ -63,7 +64,7 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 		else
 			score = -search<!player, false, trackDistance, false>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
 
-		if (trackDistance) // move score closer to zero for every move
+		if (trackDistance && score != 0) // move score closer to zero for every move
 			score -= score >= 0 ? 1 : -1;
 
 		if (root && score > bestScore) {
@@ -72,21 +73,19 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 		}
 		if (score >= beta) {
 			alpha = beta;
-			if (!root)
-				bestMove = move;
+			bestMove = move;
 			return false;
 		}
 
 		if (score > alpha) {
 			alpha = score;
-			if (!root)
-				bestMove = move;
+			bestMove = move;
 		}
 		return true;
 	});
 
-	if (!quiescence && !root) {
-		bestMove.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT;
+	if (!quiescence && !root && !trackDistance) {
+		bestMove.type = alpha <= alphaOrig ? Bound::UPPER : alpha >= beta ? Bound::LOWER : Bound::EXACT;
 		game.tt.put({
 			.depth = depthLeft,
 			.move  = bestMove,

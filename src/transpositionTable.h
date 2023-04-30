@@ -8,7 +8,7 @@
 
 
 
-enum BoundType : U8 {
+enum Bound : U8 {
 	NONE = 0,
 	LOWER = 1,
 	UPPER = 2,
@@ -23,7 +23,7 @@ struct TranspositionMove {
 				U8 fromBitFull;
 				struct {
 					U8 fromBit     : 6;
-					BoundType type : 2;
+					Bound type : 2;
 				};
 			};
 			union {

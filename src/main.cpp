@@ -39,7 +39,7 @@ void selfPlay(S64 timeMs) {
 		boards.push_back(game.board);
 		players.push_back(game.player);
 
-		// std::cout << (game.player ? "0" : "X") << ": ";
+		std::cout << (game.player ? "0" : "X") << ": ";
 		const auto& result = game.searchTime({ .time = timeMs }, persistent);
 		// result.board.print(*game.cards, game.player);
 		game.board = result.board;
@@ -86,7 +86,7 @@ void onlinePlay(int argc, char** argv, S64 timeMs) {
 			game.submitMove(conn, result.board);
 
 			persistent.lastScore = result.score;
-			persistent.lastDepth--; // skip a move
+			persistent.lastDepth--; // skip the opponent move
 		} else {
 			// std:: cout << "-" << std::endl;
 		}
@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 	if (0)
 		testMain();
 
-	if (0) {
+	if (1) {
 		singleSearch();
 		return 0;
 	}
