@@ -3,19 +3,19 @@
 
 
 inline Transposition TranspositionTableWrapper::get(U64 hash) const {
-	if (TableReplaceAlways [hash & (TT_SIZE_REPLACE_ALWAYS  - 1)].hash == hash) return TableReplaceAlways [hash & (TT_SIZE_REPLACE_ALWAYS  - 1)];
-	if (TableDepthPreferred[hash & (TT_SIZE_DEPTH_PREFERRED - 1)].hash == hash) return TableDepthPreferred[hash & (TT_SIZE_DEPTH_PREFERRED - 1)];
+	auto& entry = table[hash & (TT_SIZE - 1)];
+	if (entry.replaceAlways.hash == hash) return entry.replaceAlways;
+	if (entry.depthPreferred.hash == hash) return entry.depthPreferred;
 	Transposition blank;
 	blank.hash = 0;
 	return blank;
 }
 
 inline void TranspositionTableWrapper::put(const Transposition trans) {
-	auto& replaceAlwaysEntry = TableReplaceAlways[trans.hash & (TT_SIZE_REPLACE_ALWAYS  - 1)];
-	if (replaceAlwaysEntry.hash) { // if theres something already in the replaceAlwaysTable, bump it down to the depthPreferredTable if the depth is greater
-		auto& depthPreferredEntry = TableDepthPreferred[trans.hash & (TT_SIZE_DEPTH_PREFERRED - 1)];
-		if (depthPreferredEntry.depth < replaceAlwaysEntry.depth)
-			depthPreferredEntry = replaceAlwaysEntry;
-	}
-	replaceAlwaysEntry = trans;
+	auto& entry = table[trans.hash & (TT_SIZE  - 1)];
+	// this check is optional, not doing it is faster
+	// if (entry.replaceAlways.hash)
+		if (entry.depthPreferred.depth < entry.replaceAlways.depth)
+			entry.depthPreferred = entry.replaceAlways;
+	entry.replaceAlways = trans;
 }

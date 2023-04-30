@@ -19,8 +19,9 @@ void singleSearch() {
 	// before aspiration windows: 6700ms
 	// after aspiration windows: 4000ms
 
+	game.board.print(*game.cards, 0);
 	SearchResult result = game.board.searchTime(game, 9999999999, 17);
-	result.board.print(*game.cards);
+	result.board.print(*game.cards, 1);
 }
 
 
@@ -105,12 +106,12 @@ int main(int argc, char** argv) {
 
 	S64 timeMs = 100;
 
-	if (1) {
+	if (0) {
 		singleSearch();
 		return 0;
 	}
 
-	if (0) {
+	if (1) {
 		selfPlay(timeMs);
 		return 0;
 	}

@@ -44,15 +44,17 @@ struct Transposition {
 };
 
 
+struct TranspositionEntry {
+	Transposition replaceAlways;
+	Transposition depthPreferred;
+};
 
-constexpr U64 TT_SIZE_REPLACE_ALWAYS  = (1ULL << 20) / sizeof(Transposition); // the same for now
-constexpr U64 TT_SIZE_DEPTH_PREFERRED = (1ULL << 20) / sizeof(Transposition);
+constexpr U64 TT_SIZE = (1ULL << 29) / sizeof(Transposition);
 
 
 
 class TranspositionTableWrapper {
-	std::vector<Transposition> TableReplaceAlways;
-	std::vector<Transposition> TableDepthPreferred;
+	std::vector<TranspositionEntry> table;
 
 public:
 	TranspositionTableWrapper();
