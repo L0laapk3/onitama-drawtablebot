@@ -9,9 +9,10 @@
 
 
 enum BoundType : U8 {
-	EXACT = 0,
+	NONE = 0,
 	LOWER = 1,
 	UPPER = 2,
+	EXACT = LOWER | UPPER,
 };
 
 struct TranspositionMove {
@@ -62,4 +63,6 @@ public:
 
 	bool get(U64 hash, const Transposition*& result) const;
 	void put(Transposition transposition);
+
+	void markRecalculate();
 };

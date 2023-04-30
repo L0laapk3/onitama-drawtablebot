@@ -39,17 +39,9 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 		const Transposition* ttReadEntry;
 		if (game.tt.get(hash, ttReadEntry)) {
 			if (!root && !trackDistance && (ttReadEntry->depth >= depthLeft || std::abs(ttReadEntry->score) >= SCORE::WIN)) { // todo: trackDistance
-				if (ttReadEntry->move.type == BoundType::EXACT)
+				if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? BoundType::LOWER : BoundType::UPPER))
 					return SearchResult{ ttReadEntry->score };
-				if (ttReadEntry->move.type == BoundType::LOWER) {
-					if (ttReadEntry->score > alpha)
-						alpha = ttReadEntry->score;
-				} else { // BoundType::UPPER
-					if (ttReadEntry->score < beta)
-						beta = ttReadEntry->score;
-				}
-				if (alpha >= beta)
-					return SearchResult{ ttReadEntry->score };
+
 			}
 			ttBestMove = ttReadEntry->move;
 			ttBestMove.fromBitFull = ttBestMove.fromBit; // clear boundType

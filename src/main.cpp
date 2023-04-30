@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	S64 timeMs = 1000;
+	S64 timeMs = 100;
 
 	if (1) {
 		selfPlay(timeMs);

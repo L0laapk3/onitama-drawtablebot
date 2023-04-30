@@ -68,8 +68,8 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, Depth maxDepth, bool 
 
 	Score alpha, beta;
 	if (lastParsed.outcome == SCORE::DRAW) {
-		alpha = lastScore - MUL_PIECE_ADVANTAGE / 10;
-		beta  = lastScore + MUL_PIECE_ADVANTAGE / 10;
+		alpha = -MUL_PIECE_ADVANTAGE / 10;
+		beta  = MUL_PIECE_ADVANTAGE / 10;
 	} else {
 		narrowSearchForWin(lastParsed, alpha, beta);
 		depth--; // 1 less depth, we don't need to search the next depth if its a forced loss/win
@@ -80,8 +80,7 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, Depth maxDepth, bool 
 	bool widenedAspirationWindow = false;
 	while (depth < maxDepth) {
 		depth++;
-		bool searchBoundsFail = true;
-		do {
+		while (true) {
 			result = search(game, depth, player, parsedScore.outcome != SCORE::DRAW || lastParsed.outcome != SCORE::DRAW, alpha, beta, false);
 			if (result.winningMove)
 				goto stopSearch;
@@ -95,17 +94,17 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, Depth maxDepth, bool 
 				else
 					alpha = SCORE::LOSS;
 				widenedAspirationWindow = true;
-				// printf("fail low:  alpha: %s, score: %s, beta: %s at depth %2d\n", scoreToString(alpha).c_str(), scoreToString(result.score).c_str(), scoreToString(beta).c_str(), depth);
 			} else if (result.score >= beta) {
 				if (!widenedAspirationWindow)
 					beta += MUL_PIECE_ADVANTAGE;
 				else
 					beta = SCORE::WIN;
 				widenedAspirationWindow = true;
-				// printf("fail high: alpha: %s, score: %s, beta: %s at depth %2d\n", scoreToString(alpha).c_str(), scoreToString(result.score).c_str(), scoreToString(beta).c_str(), depth);
 			} else
-				searchBoundsFail = false;
-		} while (searchBoundsFail);
+				break;
+			printf("new window: [%s, %s]\n", scoreToString(alpha).c_str(), scoreToString(beta).c_str());
+			game.tt.markRecalculate();
+		}
 
 		S64 predictedTime = result.durationUs * std::max(((double)result.durationUs) / lastDurationUs, ((double)lastDurationUs) / lastDurationUs2);
 		lastDurationUs2 = lastDurationUs;
