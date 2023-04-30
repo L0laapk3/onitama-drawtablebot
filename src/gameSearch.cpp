@@ -1,3 +1,5 @@
+#include "game.h"
+
 #include "board.h"
 #include "boardSearch.hpp"
 
@@ -17,17 +19,17 @@ void narrowSearchForWin(ScoreParsed& score, Score& alpha, Score& beta) {
 }
 
 
-SearchResult Board::search(Game& game, Depth depth, bool player, bool searchWin, Score alpha, Score beta, bool print) {
-	assertValid(*game.cards, player);
+SearchResult Game::search(Depth depth, bool searchWin, Score alpha, Score beta, bool print) {
+	board.assertValid(*cards, player);
 	SearchResult result;
 	result.durationUs = 0;
 
 	if (!searchWin) {
 		auto start = std::chrono::high_resolution_clock::now();
 		if (player)
-			result = search<1, true>(game, alpha, beta, depth);
+			(RootResult&)result = board.search<1, true>(*this, alpha, beta, depth);
 		else
-			result = search<0, true>(game, alpha, beta, depth);
+			(RootResult&)result = board.search<0, true>(*this, alpha, beta, depth);
 		auto end = std::chrono::high_resolution_clock::now();
 		result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
@@ -43,9 +45,9 @@ SearchResult Board::search(Game& game, Depth depth, bool player, bool searchWin,
 		auto prevDuration = result.durationUs;
 		auto start = std::chrono::high_resolution_clock::now();
 		if (player)
-			result = search<1, true, true>(game, alpha, beta, depth);
+			(RootResult&)result = board.search<1, true, true>(*this, alpha, beta, depth);
 		else
-			result = search<0, true, true>(game, alpha, beta, depth);
+			(RootResult&)result = board.search<0, true, true>(*this, alpha, beta, depth);
 		auto end = std::chrono::high_resolution_clock::now();
 		result.durationUs = prevDuration + std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 	}
@@ -56,14 +58,15 @@ SearchResult Board::search(Game& game, Depth depth, bool player, bool searchWin,
 	if (!result.foundMove)
 		std::cout << "no move found" << std::endl;
 
-	assertValid(*game.cards, player, result.winningMove);
+	board.assertValid(*cards, player, result.winningMove);
 
 	return result;
 }
 
 
-SearchTimeResult Board::searchTime(Game& game, S64 timeMs, Depth maxDepth, bool player, Score lastScore, Depth depth) {
-	SearchResult result;
+
+SearchTimeResult Game::searchTime(S64 timeMs, Depth maxDepth, Score lastScore, Depth depth) {
+	SearchTimeResult result;
 	ScoreParsed parsedScore{}, lastParsed = parseScore(lastScore);
 
 	Score alpha, beta;
@@ -81,7 +84,7 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, Depth maxDepth, bool 
 	while (depth < maxDepth) {
 		depth++;
 		while (true) {
-			result = search(game, depth, player, parsedScore.outcome != SCORE::DRAW || lastParsed.outcome != SCORE::DRAW, alpha, beta, false);
+			(SearchResult&)result = search(depth, parsedScore.outcome != SCORE::DRAW || lastParsed.outcome != SCORE::DRAW, alpha, beta, false);
 			if (result.winningMove)
 				goto stopSearch;
 			parsedScore = parseScore(result.score);
@@ -103,7 +106,7 @@ SearchTimeResult Board::searchTime(Game& game, S64 timeMs, Depth maxDepth, bool 
 			} else
 				break;
 			printf("new window: [%s, %s]\n", scoreToString(alpha).c_str(), scoreToString(beta).c_str());
-			game.tt.markRecalculate();
+			tt.markRecalculate();
 		}
 
 		S64 predictedTime = result.durationUs * std::max(((double)result.durationUs) / lastDurationUs, ((double)lastDurationUs) / lastDurationUs2);

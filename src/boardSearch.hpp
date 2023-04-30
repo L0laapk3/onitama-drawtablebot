@@ -10,7 +10,7 @@
 // negamax implementation
 // p0 is the maximizer
 template<bool player, bool root, bool trackDistance, bool quiescence>
-std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score alpha, Score beta, Depth depthLeft) {
+std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alpha, Score beta, Depth depthLeft) {
 	Board beforeBoard = *this;
 
 	U8 thisCardI = cardI;
@@ -23,25 +23,25 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 			board.doWinInOne<player>(moveList);
 			board.assertValid(*game.cards, !player, true);
 		}
-		return SearchResult{ SCORE::WIN, board, true, true };
+		return RootResult{ SCORE::WIN, board, true, true };
 	}
 
-	if (!root && quiescence) {
+	if constexpr (!root && quiescence) {
 		Score standing_pat = evaluate<player>();
 		if (standing_pat >= beta)
-			return SearchResult{ beta };
+			return beta;
 		if (standing_pat > alpha)
 			alpha = standing_pat;
 	}
 
 	TranspositionMove ttBestMove{};
-	if (!quiescence) {
+	if constexpr (!quiescence) {
 		const Transposition* ttReadEntry;
 		if (game.tt.get(hash, ttReadEntry)) {
-			if (!root && !trackDistance && (ttReadEntry->depth >= depthLeft || std::abs(ttReadEntry->score) >= SCORE::WIN)) { // todo: trackDistance
-				if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? BoundType::LOWER : BoundType::UPPER))
-					return SearchResult{ ttReadEntry->score };
-
+			if constexpr (!root && !trackDistance) { // todo: trackDistance
+				if ((ttReadEntry->depth >= depthLeft || std::abs(ttReadEntry->score) >= SCORE::WIN))
+					if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? BoundType::LOWER : BoundType::UPPER))
+						return ttReadEntry->score;
 			}
 			ttBestMove = ttReadEntry->move;
 			ttBestMove.fromBitFull = ttBestMove.fromBit; // clear boundType
@@ -99,5 +99,5 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 
 	assume(*this == beforeBoard);
 
-	return SearchResult{ alpha, nextBoard, foundMove };
+	return RootResult{ alpha, nextBoard, foundMove };
 }

@@ -20,7 +20,7 @@ void singleSearch() {
 	// after aspiration windows: 4000ms
 
 	game.board.print(*game.cards, 0);
-	SearchResult result = game.board.searchTime(game, 9999999999, 17);
+	SearchResult result = game.searchTime(9999999999, 17);
 	result.board.print(*game.cards, 1);
 }
 
@@ -41,7 +41,8 @@ void selfPlay(S64 timeMs) {
 		players.push_back(game.player);
 
 		std::cout << (game.player ? "0" : "X") << ": ";
-		const auto& result = game.board.searchTime(game, timeMs, DEPTH_MAX, game.player, lastScore, lastDepth);
+		const auto& result = game.searchTime(timeMs, DEPTH_MAX, lastScore, lastDepth);
+		// result.board.print(*game.cards, game.player);
 		game.board = result.board;
 		game.player = !game.player;
 		game.board.recalculateHash(game.player);
@@ -76,9 +77,9 @@ void onlinePlay(int argc, char** argv, S64 timeMs) {
 	Score lastScore = 0;
 	Depth lastDepth = 1;
 	while (true) {
-		// game.board.print(*game.cards, !game.myTurn);
+		game.board.print(*game.cards, !game.myTurn);
 		if (game.myTurn) {
-			auto result = game.board.searchTime(game, timeMs, DEPTH_MAX, 0, lastScore, lastDepth);
+			auto result = game.searchTime(timeMs, DEPTH_MAX, lastScore, lastDepth);
 			// result.board.print(*game.cards, game.myTurn);
 			result.board.checkValid(*game.cards, game.myTurn, result.winningMove);
 			game.submitMove(conn, result.board);

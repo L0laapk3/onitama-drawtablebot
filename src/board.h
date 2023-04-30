@@ -20,7 +20,7 @@ struct SearchWindow {
 
 struct TranspositionMove;
 class Game;
-struct SearchResult;
+struct RootResult;
 struct SearchTimeResult;
 class Board {
 public:
@@ -81,22 +81,13 @@ public:
 
 	// boardSearch.hpp
 	template<bool player, bool root = false, bool trackDistance = false, bool quiescence = false>
-	std::conditional_t<root, SearchResult, Score> search(Game& game, Score alpha, Score beta, Depth depthLeft);
-
-	// boardSearchTools.cpp
-	SearchResult search(Game& game, Depth depth, bool player = 0, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
-	SearchTimeResult searchTime(Game& game, S64 timeMs, Depth maxDepth = DEPTH_MAX, bool player = 0, Score lastScore = 0, Depth lastDepth = 1);
-	// SearchTimeResult searchTimeWithPanic(Game& game, S64 timeMs, bool player = 0, SearchTimeResult& lastResult);
+	std::conditional_t<root, RootResult, Score> search(Game& game, Score alpha, Score beta, Depth depthLeft);
 };
 
-struct SearchResult {
+struct RootResult {
 	Score score;
 	Board board;
 	bool foundMove = true;
 	bool winningMove = false;
 	operator Score() const { return score; };
-	S64 durationUs;
-};
-struct SearchTimeResult : public SearchResult {
-	Depth depth;
 };
