@@ -37,10 +37,10 @@ struct TranspositionMove {
 };
 
 struct Transposition {
-	U64 hash;
-	Score score;
 	Depth depth;
 	TranspositionMove move;
+	Score score;
+	U64 hash;
 };
 
 
@@ -50,7 +50,7 @@ struct TranspositionEntry {
 };
 
 // 2^23 seems to be the smallest size that works well for a 100ms search
-constexpr U64 TT_SIZE = (1ULL << 28) / sizeof(Transposition);
+constexpr U64 TT_SIZE = (1ULL << 29) / sizeof(Transposition);
 
 
 

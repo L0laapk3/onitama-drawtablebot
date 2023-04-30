@@ -98,10 +98,10 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 	if (!quiescence && !root && !trackDistance) { // TODO: trackdistance..
 		bestMove.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT;
 		game.tt.put({
-			.hash  = hash,
-			.score = alpha,
 			.depth = depthLeft,
 			.move  = bestMove,
+			.score = alpha,
+			.hash  = hash,
 		});
 	}
 
