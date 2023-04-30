@@ -68,10 +68,12 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 		for (int quiet = 0; quiet < 2; quiet++) {
 			U32 sourceBits = p[player];
 			do {
+				TranspositionMove ttMove;
+
 				U32 sourcePiece = sourceBits & -sourceBits;
 				sourceBits &= sourceBits - 1;
-				U32 sourceIndex = _tzcnt_u32(sourcePiece);
-				auto& landBitsCards = moveList[sourceIndex].flip[player].cards;
+				ttMove.fromBitFull = _tzcnt_u32(sourcePiece);
+				auto& landBitsCards = moveList[ttMove.fromBitFull].flip[player].cards;
 				U32 landBits = landBitsCards[0] | landBitsCards[1];
 
 				landBits &= ~p[player];
@@ -82,24 +84,19 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 				k[player] ^= sourceKing;
 				U32 kingMask = sourceKing ? ~0 : 0;
 
-				hash ^= kingMask ? ZOBRIST.kings[player][sourceIndex] : ZOBRIST.pawns[player][sourceIndex];
-
-				TranspositionMove ttMove;
-				ttMove.fromBitFull = sourceIndex;
+				hash ^= kingMask ? ZOBRIST.kings[player][ttMove.fromBitFull] : ZOBRIST.pawns[player][ttMove.fromBitFull];
 
 				while (landBits && cont) {
 					U32 landPiece = landBits & -landBits;
 					landBits &= landBits - 1;
-					U32 landIndex = _tzcnt_u32(landPiece);
+					ttMove.toBitFull = _tzcnt_u32(landPiece);
 
 					p[player] |= landPiece;
 					if (!quiet)
 						p[!player] ^= landPiece;
 					k[player] |= landPiece & kingMask;
 
-					hash ^= kingMask ? ZOBRIST.kings[quiet ? player : 2 + player][landIndex] : ZOBRIST.pawns[quiet ? player : 2][landIndex]; // quiet: combined take hash
-
-					ttMove.toBitFull = landIndex;
+					hash ^= kingMask ? ZOBRIST.kings[quiet ? player : 2 + player][ttMove.toBitFull] : ZOBRIST.pawns[quiet ? player : 2][ttMove.toBitFull]; // quiet: combined take hash
 
 					bool other = false, stop = false;
 					#pragma unroll
@@ -127,7 +124,7 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 							other = true; // one of two cards must be used
 					}
 
-					hash ^= kingMask ? ZOBRIST.kings[quiet ? player : 2 + player][landIndex] : ZOBRIST.pawns[quiet ? player : 2][landIndex];
+					hash ^= kingMask ? ZOBRIST.kings[quiet ? player : 2 + player][ttMove.toBit] : ZOBRIST.pawns[quiet ? player : 2][ttMove.toBit];
 
 					p[player] ^= landPiece;
 					if (!quiet)
@@ -135,7 +132,7 @@ inline void Board::iterateMoves(Game& game, bool quiesence, TranspositionMove be
 					k[player] ^= landPiece & kingMask;
 				}
 
-				hash ^= kingMask ? ZOBRIST.kings[player][sourceIndex] : ZOBRIST.pawns[player][sourceIndex];
+				hash ^= kingMask ? ZOBRIST.kings[player][ttMove.fromBit] : ZOBRIST.pawns[player][ttMove.fromBit];
 
 				p[player] |= sourcePiece;
 				k[player] |= sourceKing;
