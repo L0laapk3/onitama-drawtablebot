@@ -13,11 +13,6 @@
 
 
 
-struct SearchWindow {
-	Score alpha = -MUL_PIECE_ADVANTAGE / 10;
-	Score beta  =  MUL_PIECE_ADVANTAGE / 10;
-};
-
 struct TranspositionMove;
 class Game;
 struct RootResult;

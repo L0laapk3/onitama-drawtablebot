@@ -11,6 +11,17 @@
 
 
 
+struct SearchStopCriteria {
+	S64 time    = std::numeric_limits<S64>::max();
+	Depth depth = DEPTH_MAX;
+};
+
+struct SearchPersistent {
+	Score alpha = -MUL_PIECE_ADVANTAGE / 10;
+	Score beta  =  MUL_PIECE_ADVANTAGE / 10;
+	Score lastScore = 0;
+	Depth lastDepth = 1;
+};
 
 struct SearchResult : public RootResult {
 	S64 durationUs;
@@ -52,6 +63,6 @@ public:
 private:
 	SearchResult search(Depth depth, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
 public:
-	SearchTimeResult searchTime(S64 timeMs, Depth maxDepth = DEPTH_MAX, Score lastScore = 0, Depth lastDepth = 1);
-	// SearchTimeResult searchTimeWithPanic(Game& game, S64 timeMs, SearchTimeResult& lastResult);
+	SearchTimeResult searchTime(SearchStopCriteria stop, SearchPersistent& persistent);
+	SearchTimeResult searchTime(SearchStopCriteria stop);
 };

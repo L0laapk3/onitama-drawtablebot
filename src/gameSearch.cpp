@@ -36,7 +36,7 @@ SearchResult Game::search(Depth depth, bool searchWin, Score alpha, Score beta, 
 		auto parsed = parseScore(result.score);
 		if (parsed.outcome != SCORE::DRAW) {
 			searchWin = true;
- 			narrowSearchForWin(parsed, alpha, beta);
+ 			// narrowSearchForWin(parsed, alpha, beta);
 		}
 	}
 
@@ -65,58 +65,62 @@ SearchResult Game::search(Depth depth, bool searchWin, Score alpha, Score beta, 
 
 
 
-SearchTimeResult Game::searchTime(S64 timeMs, Depth maxDepth, Score lastScore, Depth depth) {
+SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& persistent) {
 	SearchTimeResult result;
-	ScoreParsed parsedScore{}, lastParsed = parseScore(lastScore);
+	ScoreParsed parsedScore{}, lastParsed = parseScore(persistent.lastScore);
 
-	Score alpha, beta;
-	if (lastParsed.outcome == SCORE::DRAW) {
-		alpha = -MUL_PIECE_ADVANTAGE / 10;
-		beta  = MUL_PIECE_ADVANTAGE / 10;
-	} else {
-		narrowSearchForWin(lastParsed, alpha, beta);
+	Depth depth = persistent.lastDepth;
+	bool lastIsMate = lastParsed.outcome != SCORE::DRAW;
+	if (lastIsMate) {
 		depth--; // 1 less depth, we don't need to search the next depth if its a forced loss/win
 	}
 	// printf("alpha: %s, beta: %s\n", scoreToString(alpha).c_str(), scoreToString(beta).c_str());
 
 	S64 lastDurationUs = 1, lastDurationUs2 = 1;
 	bool widenedAspirationWindow = false;
-	while (depth < maxDepth) {
+	while (depth < stop.depth) {
 		depth++;
 		while (true) {
-			(SearchResult&)result = search(depth, parsedScore.outcome != SCORE::DRAW || lastParsed.outcome != SCORE::DRAW, alpha, beta, false);
+			// printf("window: [%s, %s]\n", scoreToString(persistent.alpha).c_str(), scoreToString(persistent.beta).c_str());
+			(SearchResult&)result = search(depth, parsedScore.outcome != SCORE::DRAW || lastParsed.outcome != SCORE::DRAW, persistent.alpha, persistent.beta, false);
 			if (result.winningMove)
 				goto stopSearch;
 			parsedScore = parseScore(result.score);
-			if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth + 1)
-				goto stopSearch;
+			if (parsedScore.outcome != SCORE::DRAW) {
+				if (!lastIsMate) {
+					// narrowSearchForWin(parsedScore, persistent.alpha, persistent.beta);
+					lastIsMate = true;
+				}
+				if (parsedScore.outcomeDistance <= depth + 1)
+					goto stopSearch;
+			}
 
-			if (result.score <= alpha) {
-				if (!widenedAspirationWindow)
-					alpha -= MUL_PIECE_ADVANTAGE;
+			if (result.score <= persistent.alpha) {
+				if (!widenedAspirationWindow && persistent.alpha > -MUL_PIECE_ADVANTAGE)
+					persistent.alpha -= MUL_PIECE_ADVANTAGE;
 				else
-					alpha = SCORE::LOSS;
+					persistent.alpha = SCORE::LOSS;
 				widenedAspirationWindow = true;
-			} else if (result.score >= beta) {
-				if (!widenedAspirationWindow)
-					beta += MUL_PIECE_ADVANTAGE;
+			} else if (result.score >= persistent.beta) {
+				if (!widenedAspirationWindow && persistent.beta < MUL_PIECE_ADVANTAGE)
+					persistent.beta += MUL_PIECE_ADVANTAGE;
 				else
-					beta = SCORE::WIN;
+					persistent.beta = SCORE::WIN;
 				widenedAspirationWindow = true;
 			} else
 				break;
-			printf("new window: [%s, %s]\n", scoreToString(alpha).c_str(), scoreToString(beta).c_str());
+			// printf("new window: [%s, %s] %s\n", scoreToString(persistent.alpha).c_str(), scoreToString(persistent.beta).c_str(), scoreToString(result.score).c_str());
 			tt.markRecalculate();
 		}
 
 		S64 predictedTime = result.durationUs * std::max(((double)result.durationUs) / lastDurationUs, ((double)lastDurationUs) / lastDurationUs2);
 		lastDurationUs2 = lastDurationUs;
 		lastDurationUs = std::max<S64>(result.durationUs, 1);
-		if (result.durationUs > timeMs * 1000 / 2) // 2 is an arbitrary estimation of the increased branching factor from next iteration depth
+		if (result.durationUs > stop.time * 1000 / 2) // 2 is an arbitrary estimation of the increased branching factor from next iteration depth
 			break;
 	}
 stopSearch:
-	printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score, player).c_str(), result.durationUs / 1000);
+	printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score).c_str(), result.durationUs / 1000);
 	return {
 		result,
 		depth,
@@ -124,5 +128,11 @@ stopSearch:
 }
 
 
-constexpr Score PANIC_TRESHOLD = MUL_POSITION_ADVANTAGE / 2;
-constexpr int PANIC_TIME_MULTIPLIER = 8;
+SearchTimeResult Game::searchTime(SearchStopCriteria stop) {
+	SearchPersistent persistent;
+	return searchTime(stop, persistent);
+}
+
+
+// constexpr Score PANIC_TRESHOLD = MUL_POSITION_ADVANTAGE / 2;
+// constexpr int PANIC_TIME_MULTIPLIER = 8;

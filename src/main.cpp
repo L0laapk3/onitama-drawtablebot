@@ -20,7 +20,7 @@ void singleSearch() {
 	// after aspiration windows: 4000ms
 
 	game.board.print(*game.cards, 0);
-	SearchResult result = game.searchTime(9999999999, 17);
+	SearchResult result = game.searchTime({ .depth = 17 });
 	result.board.print(*game.cards, 1);
 }
 
@@ -34,20 +34,23 @@ void selfPlay(S64 timeMs) {
 	std::vector<Board> boards{};
 	std::vector<bool> players{};
 
-	Score lastScore = 0;
-	Depth lastDepth = 1;
+	SearchPersistent persistent{};
 	while (true) {
 		boards.push_back(game.board);
 		players.push_back(game.player);
 
 		std::cout << (game.player ? "0" : "X") << ": ";
-		const auto& result = game.searchTime(timeMs, DEPTH_MAX, lastScore, lastDepth);
+		const auto& result = game.searchTime({ .time = timeMs }, persistent);
 		// result.board.print(*game.cards, game.player);
 		game.board = result.board;
 		game.player = !game.player;
 		game.board.recalculateHash(game.player);
-		lastScore = -result.score; // negate because simulation both players
-		lastDepth = result.depth - 1; // only subtract 1 because simulates both players
+
+		std::swap(persistent.alpha, persistent.beta);
+		persistent.alpha = -persistent.alpha;
+		persistent.beta  = -persistent.beta;
+		persistent.lastScore = -result.score; // negate because simulation both players
+		persistent.lastDepth = result.depth - 1; // only subtract 1 because simulates both players
 
 		if (result.winningMove)
 			break;
@@ -74,18 +77,17 @@ void onlinePlay(int argc, char** argv, S64 timeMs) {
 
 	std::cout << (game.player ? "blue" : "red") << std::endl;
 
-	Score lastScore = 0;
-	Depth lastDepth = 1;
+	SearchPersistent persistent{};
 	while (true) {
 		game.board.print(*game.cards, !game.myTurn);
 		if (game.myTurn) {
-			auto result = game.searchTime(timeMs, DEPTH_MAX, lastScore, lastDepth);
+			auto result = game.searchTime({ .time = timeMs }, persistent);
 			// result.board.print(*game.cards, game.myTurn);
 			result.board.checkValid(*game.cards, game.myTurn, result.winningMove);
 			game.submitMove(conn, result.board);
 
-			lastScore = result.score;
-			lastDepth = result.depth - 2;
+			persistent.lastScore = result.score;
+			persistent.lastDepth = result.depth - 2;
 		} else {
 			// std:: cout << "-" << std::endl;
 		}
