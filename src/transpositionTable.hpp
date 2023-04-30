@@ -2,13 +2,12 @@
 
 
 
-inline Transposition TranspositionTableWrapper::get(U64 hash) const {
+inline bool TranspositionTableWrapper::get(U64 hash, const Transposition*& result) const {
 	auto& entry = table[hash & (TT_SIZE - 1)];
-	if (entry.depthPreferred.hash == hash) return entry.depthPreferred;
-	if (entry.replaceAlways.hash  == hash) return entry.replaceAlways;
-	Transposition blank;
-	blank.hash = 0;
-	return blank;
+	result = &entry.depthPreferred;
+	if (result->hash != hash) // if depthPreferred doesn't match, try replaceAlways
+		result++;
+	return result->hash == hash;
 }
 
 inline void TranspositionTableWrapper::put(const Transposition trans) {

@@ -55,11 +55,11 @@ constexpr U64 TT_SIZE = (1ULL << 29) / sizeof(Transposition);
 
 
 class TranspositionTableWrapper {
+public:
 	std::vector<TranspositionEntry> table;
 
-public:
 	TranspositionTableWrapper();
 
-	Transposition get(U64 hash) const;
+	bool get(U64 hash, const Transposition*& result) const;
 	void put(Transposition transposition);
 };
