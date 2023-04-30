@@ -9,7 +9,7 @@
 
 // negamax implementation
 // p0 is the maximizer
-template<bool player, bool root, bool trackDistance>
+template<bool player, bool root, bool trackDistance, bool quiescence>
 std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score alpha, Score beta, Depth depthLeft) {
 	Board beforeBoard = *this;
 
@@ -26,7 +26,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 		return SearchResult{ SCORE::WIN, board, true, true };
 	}
 
-	if (!root && depthLeft <= 0) {
+	if (!root && quiescence) {
 		Score standing_pat = evaluate<player>();
 		if (standing_pat >= beta)
 			return SearchResult{ beta };
@@ -36,10 +36,10 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 
 	Transposition* ttWriteEntry;
 	TranspositionMove ttBestMove{};
-	if (depthLeft > 0) { // TODO: trackdistance..
+	if (!quiescence) {
 		auto ttReadEntry = game.tt.get(hash);
 		if (ttReadEntry.hash) {
-			if (!root && !trackDistance && (ttReadEntry.depth >= depthLeft || std::abs(ttReadEntry.score) >= SCORE::WIN)) {
+			if (!root && !trackDistance && (ttReadEntry.depth >= depthLeft || std::abs(ttReadEntry.score) >= SCORE::WIN)) { // todo: trackDistance
 				if (ttReadEntry.move.type == BoundType::EXACT)
 					return SearchResult{ ttReadEntry.score };
 				if (ttReadEntry.move.type == BoundType::LOWER) {
@@ -58,16 +58,19 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 	}
 
 	// TODO: TT bestmove logic
-
 	TranspositionMove bestMove{};
 	Score alphaOrig = alpha;
 	Board nextBoard;
 	bool foundMove = false;
 	Score bestScore = SCORE::MIN;
-	iterateMoves<player>(game, !root && depthLeft <= 0, ttBestMove, [&](TranspositionMove& move) {
+	iterateMoves<player, !root && quiescence>(game, ttBestMove, [&](TranspositionMove& move) {
 		foundMove = true;
 		Board beforeBoard = *this;
-		Score score = -search<!player, false, trackDistance>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
+		Score score;
+		if (quiescence || depthLeft - 1 <= 0)
+			score = -search<!player, false, trackDistance, true>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), 0);
+		else
+			score = -search<!player, false, trackDistance, false>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
 		// trackDistance: widen the search window so we can subtract one again to penalize for distance
 
 		if (trackDistance) // move score closer to zero for every move
@@ -92,7 +95,7 @@ std::conditional_t<root, SearchResult, Score> Board::search(Game& game, Score al
 		return true;
 	});
 
-	if (depthLeft > 0 && !root && !trackDistance) { // TODO: trackdistance..
+	if (!quiescence && !root && !trackDistance) { // TODO: trackdistance..
 		bestMove.type = alpha <= alphaOrig ? BoundType::UPPER : alpha >= beta ? BoundType::LOWER : BoundType::EXACT;
 		game.tt.put({
 			.hash  = hash,

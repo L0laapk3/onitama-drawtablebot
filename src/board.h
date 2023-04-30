@@ -71,11 +71,11 @@ public:
 	Score evaluateHalf() const;
 
 	// boardIter.hpp
-	template<bool player, typename Callable>
-	void iterateMoves(Game& game, bool quiesence, TranspositionMove bestMove, const Callable f);
+	template<bool player, bool quiescence, typename Callable>
+	void iterateMoves(Game& game, TranspositionMove bestMove, const Callable f);
 
 	// boardSearch.hpp
-	template<bool player, bool root = false, bool trackDistance = false>
+	template<bool player, bool root = false, bool trackDistance = false, bool quiescence = false>
 	std::conditional_t<root, SearchResult, Score> search(Game& game, Score alpha, Score beta, Depth depthLeft);
 
 	// boardSearchTools.cpp
