@@ -49,7 +49,7 @@ void selfPlay(S64 timeMs) {
 		std::swap(persistent.alpha, persistent.beta);
 		persistent.alpha = -persistent.alpha;
 		persistent.beta  = -persistent.beta;
-		persistent.lastScore = -result.score; // negate because simulation both players
+		persistent.score = -result.score; // negate because simulation both players
 
 		if (result.winningMove)
 			break;
@@ -85,8 +85,8 @@ void onlinePlay(int argc, char** argv, S64 timeMs) {
 			result.board.checkValid(*game.cards, game.myTurn, result.winningMove);
 			game.submitMove(conn, result.board);
 
-			persistent.lastScore = result.score;
-			persistent.lastDepth--; // skip the opponent move
+			persistent.score = result.score;
+			persistent.depth--; // skip the opponent move
 		} else {
 			// std:: cout << "-" << std::endl;
 		}

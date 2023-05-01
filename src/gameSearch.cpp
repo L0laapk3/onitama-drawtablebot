@@ -53,29 +53,33 @@ SearchResult Game::search(Depth depth, bool searchWin, Score alpha, Score beta, 
 
 SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& persistent) {
 	SearchTimeResult result;
-	ScoreParsed parsedScore{}, lastParsed = parseScore(persistent.lastScore);
+	ScoreParsed parsedScore{}, lastParsed = parseScore(persistent.score);
 
 	bool searchWin = lastParsed.outcome != SCORE::DRAW;
+	if (searchWin != persistent.searchWin) {
+		persistent.searchWin = searchWin;
+		tt.markRecalculateScore(searchWin);
+	}
 	// printf("alpha: %s, beta: %s\n", scoreToString(alpha).c_str(), scoreToString(beta).c_str());
 
 	S64 lastDurationUs = 1, lastDurationUs2 = 1;
 	bool widenedAspirationWindow = false;
-	Depth depth = persistent.lastDepth;
+	Depth depth = 1; //persistent.lastDepth;
 	S64 usedTime = 0;
 	stop.time *= 1000;
 	while (depth < stop.depth) {
 		depth++;
 		while (true) {
 			while (true) {
-				// printf("window: [%s, %s], win: %d\n", scoreToString(persistent.alpha).c_str(), scoreToString(persistent.beta).c_str(), searchWin);
-				(SearchResult&)result = search(depth, searchWin, persistent.alpha, persistent.beta, false);
+				// printf("window: [%s, %s], win: %d\n", scoreToString(persistent.alpha).c_str(), scoreToString(persistent.beta).c_str(), persistent.searchWin);
+				(SearchResult&)result = search(depth, persistent.searchWin, persistent.alpha, persistent.beta, false);
 				usedTime += result.durationUs;
 				parsedScore = parseScore(result.score);
-				if ((parsedScore.outcome != SCORE::DRAW) != searchWin) {
+				if ((parsedScore.outcome != SCORE::DRAW) && !persistent.searchWin) {
 					// switch from/to mate search mode
-					searchWin = parsedScore.outcome != SCORE::DRAW;
-					// std::cout << "depth: " << depth << " switching search for win: " << searchWin << " score: " << scoreToString(result.score, player) << std::endl;
-					tt.markRecalculateScore(searchWin);
+					persistent.searchWin = parsedScore.outcome != SCORE::DRAW;
+					// std::cout << "depth: " << depth << " switching search for win: " << persistent.searchWin << " score: " << scoreToString(result.score, player) << std::endl;
+					tt.markRecalculateScore(persistent.searchWin);
 					continue;
 				}
 				if (result.winningMove)
@@ -83,8 +87,8 @@ SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& per
 				// if (parsedScore.outcome != SCORE::DRAW)
 				// 	std::cout << "depth " << depth << ": found mate in " << parsedScore.outcomeDistance << std::endl;
 				if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth + 1) {
-					persistent.lastDepth = parsedScore.outcomeDistance - 2; // limit next search depth to mate distance
-					// std::cout << "stop at " << persistent.lastDepth << std::endl;
+					persistent.depth = parsedScore.outcomeDistance - 2; // limit next search depth to mate distance
+					// std::cout << "stop at " << persistent.depth << std::endl;
 					goto stopSearchNoDepthSet;
 				}
 				break;
@@ -110,17 +114,20 @@ SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& per
 			tt.markRecalculate();
 		}
 
-		S64 predictedTime = result.durationUs * std::max(((double)result.durationUs) / lastDurationUs, ((double)lastDurationUs) / lastDurationUs2);
-		lastDurationUs2 = lastDurationUs;
-		lastDurationUs = std::max<S64>(result.durationUs, 1);
 		if (result.durationUs > stop.time - usedTime)
 			break;
 	}
 stopSearch:
-	persistent.lastDepth = depth;
+	persistent.depth = depth;
 stopSearchNoDepthSet:
-	persistent.lastDepth--; // next search: one less depth
+	persistent.depth--; // next search: one less depth
 	printf("Depth: %2d, Score: %s, Time: %lldms\n", depth, scoreToString(result.score, player).c_str(), usedTime / 1000);
+
+	if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance < depth + 1 && depth > 2) {
+		std::cout << "bruh momento" << std::endl;
+		std::exit(1);
+	}
+
 	return {
 		result,
 		depth,

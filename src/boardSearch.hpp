@@ -12,6 +12,7 @@
 template<bool player, bool root, bool trackDistance, bool quiescence>
 std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alpha, Score beta, Depth depthLeft) {
 	Board beforeBoard = *this;
+	Score alphaOrig = alpha;
 
 	U8 thisCardI = cardI;
 	const auto& moveList = game.cards->moveBoards[CARDS_HAND[player][cardI]];
@@ -40,9 +41,11 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 		if (game.tt.get(hash, ttReadEntry)) {
 			if constexpr (!root) {
 				// TT cutoff copied from stockfish - works much better than wikipedia/chessprogramming's version
-				if (ttReadEntry->depth >= depthLeft || std::abs(ttReadEntry->score) >= SCORE::WIN) {
+				if (ttReadEntry->depth >= depthLeft || std::abs(ttReadEntry->score) >= SCORE::WIN - (trackDistance ? ttReadEntry->depth : 0)) {
 				// if (ttReadEntry->depth > depthLeft - (ttReadEntry->move.bound == Bound::EXACT) || std::abs(ttReadEntry->score) >= SCORE::WIN)
 					// if (ttReadEntry->move.bound & (ttReadEntry->score >= beta ? Bound::LOWER : Bound::UPPER))
+					// 	return ttReadEntry->score;
+
 					if (ttReadEntry->move.bound & Bound::UPPER && ttReadEntry->score < beta)
 						beta = ttReadEntry->score;
 					if (ttReadEntry->move.bound & Bound::LOWER && ttReadEntry->score > alpha)
@@ -58,7 +61,6 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 
 	// TODO: TT bestmove logic
 	TranspositionMove bestMove{};
-	Score alphaOrig = alpha;
 	Board nextBoard;
 	bool foundMove = false;
 	Score bestRootScore = SCORE::MIN;

@@ -19,8 +19,9 @@ struct SearchStopCriteria {
 struct SearchPersistent {
 	Score alpha = -MUL_PIECE_ADVANTAGE / 10;
 	Score beta  =  MUL_PIECE_ADVANTAGE / 10;
-	Score lastScore = 0;
-	Depth lastDepth = 0;
+	Score score = 0;
+	Depth depth = 0;
+	bool searchWin = false;
 };
 
 struct SearchResult : public RootResult {
@@ -55,7 +56,7 @@ public:
 	bool myTurn = 1;
 	bool ended = false;
 	// U32 turnCount = 0;
-	// U8 lastDepth = 0;
+	// U8 depth = 0;
 	// Score lastScore = 0;
 	Board board;
 
