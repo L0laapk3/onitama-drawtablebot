@@ -41,21 +41,21 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 			if constexpr (!root && !trackDistance) {
 				// TT cutoff copied from stockfish - works much better than wikipedia/chessprogramming's version
 				if (ttReadEntry->depth >= depthLeft) { // || std::abs(ttReadEntry->score) >= SCORE::WIN)
-				// if (ttReadEntry->depth > depthLeft - (ttReadEntry->move.type == Bound::EXACT) || std::abs(ttReadEntry->score) >= SCORE::WIN)
-					// if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? Bound::LOWER : Bound::UPPER))
-					if (ttReadEntry->move.type == Bound::EXACT)
+				// if (ttReadEntry->depth > depthLeft - (ttReadEntry->move.bound == Bound::EXACT) || std::abs(ttReadEntry->score) >= SCORE::WIN)
+					// if (ttReadEntry->move.bound & (ttReadEntry->score >= beta ? Bound::LOWER : Bound::UPPER))
+					if (ttReadEntry->move.bound == Bound::EXACT)
 						return ttReadEntry->score;
-					else if (ttReadEntry->move.type == Bound::UPPER) {
+					else if (ttReadEntry->move.bound == Bound::UPPER) {
 						if (ttReadEntry->score <= alpha)
 							return ttReadEntry->score;
-					} else if (ttReadEntry->move.type == Bound::LOWER) {
+					} else { //if (ttReadEntry->move.bound == Bound::LOWER) {
 						if (ttReadEntry->score >= beta)
 							return ttReadEntry->score;
 					}
 				}
 			}
 			ttBestMove = ttReadEntry->move;
-			ttBestMove.fromBitFull = ttBestMove.fromBit; // clear boundType
+			ttBestMove.fromBitFull = ttBestMove.fromBit; // clear bound
 		}
 	}
 
@@ -93,8 +93,8 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 	});
 
 	if (!quiescence && !root && !trackDistance) {
-		bestMove.type = alphaOrig >= alpha ? Bound::UPPER : alpha >= beta ? Bound::LOWER : Bound::EXACT;
-		game.tt.put(Transposition{
+		bestMove.bound = alphaOrig >= alpha ? Bound::UPPER : alpha >= beta ? Bound::LOWER : Bound::EXACT;
+		game.tt.put({
 			.depth = depthLeft,
 			.move  = bestMove,
 			.score = alpha,
