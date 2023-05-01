@@ -26,8 +26,8 @@ inline void Board::iterateMoves(Game& game, TranspositionMove bestMove, const Ca
 		U32 pTo = 1U << bestMove.toBit;
 		U32 pMove = pFrom | pTo;
 		if (bestMove.full) {
-			// if (!(pFrom & p[player]) || !(pTo & moveList[bestMove.fromBitFull].flip[player].cards[bestMove.secondCard])) // TODO: maybe do something with this
-			// 	std::cout << "shit ass bitch ass collision" << std::endl;
+			if (!(pFrom & p[player]) || !(pTo & moveList[bestMove.fromBitFull].flip[player].cards[bestMove.secondCard])) // TODO: maybe do something with this
+				std::cout << "shit ass bitch ass collision" << std::endl;
 
 
 			p[player] ^= pMove;

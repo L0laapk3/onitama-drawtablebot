@@ -40,8 +40,10 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 		if (game.tt.get(hash, ttReadEntry)) {
 			if constexpr (!root && !trackDistance) {
 				// TT cutoff copied from stockfish - works much better than wikipedia/chessprogramming's version
-				if (ttReadEntry->depth > depthLeft - (ttReadEntry->move.type == Bound::EXACT) || std::abs(ttReadEntry->score) >= SCORE::WIN)
+				if (ttReadEntry->depth >= depthLeft) // || std::abs(ttReadEntry->score) >= SCORE::WIN)
+				// if (ttReadEntry->depth > depthLeft - (ttReadEntry->move.type == Bound::EXACT) || std::abs(ttReadEntry->score) >= SCORE::WIN)
 					if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? Bound::LOWER : Bound::UPPER))
+					// if (ttReadEntry->move.type == Bound::EXACT)
 						return ttReadEntry->score;
 			}
 			ttBestMove = ttReadEntry->move;

@@ -106,7 +106,7 @@ int main(int argc, char** argv) {
 	if (0)
 		testMain();
 
-	if (1) {
+	if (0) {
 		singleSearch();
 		return 0;
 	}
