@@ -60,7 +60,7 @@ void selfPlay(S64 timeMs) {
 	}
 	boards.push_back(game.board);
 	players.push_back(game.player);
-	// std::cout << Board::toString(*game.cards, boards, players);
+	std::cout << Board::toString(*game.cards, boards, players);
 }
 
 
@@ -111,9 +111,9 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
-	S64 timeMs = 1000;
+	S64 timeMs = 100;
 
-	if (0) {
+	if (1) {
 		while (true)
 			selfPlay(timeMs);
 		return 0;

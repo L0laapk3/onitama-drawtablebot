@@ -26,7 +26,7 @@ constexpr auto kingScoresMinusPawn = [](){
 	std::array<std::array<Score, 25>, 2> scores{};
 	for (int flip = 0; flip < 2; flip++)
 		for (U64 i = 0; i < 25; i++)
-			scores[flip][flip ? 24 - i : i] = kingScores[i] - pawnScores[i];
+			scores[flip][flip ? i : 24 - i] = kingScores[i] - pawnScores[i];
 	return scores;
 }();
 
