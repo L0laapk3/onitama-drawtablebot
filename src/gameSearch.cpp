@@ -11,10 +11,10 @@
 void narrowSearchForWin(ScoreParsed& score, Score& alpha, Score& beta) {
 	if (score.outcome == SCORE::WIN) {
 		beta = SCORE::WIN;
-		alpha = SCORE::WIN - (DEPTH_MAX + 1);
+		alpha = SCORE::WIN - DEPTH_MAX;
 	} else if (score.outcome == SCORE::LOSS) {
 		alpha = SCORE::LOSS;
-		beta = SCORE::LOSS + (DEPTH_MAX + 1);
+		beta = SCORE::LOSS + DEPTH_MAX;
 	}
 }
 
@@ -25,14 +25,14 @@ SearchResult Game::search(Depth depth, bool searchWin, Score alpha, Score beta, 
 	auto start = std::chrono::high_resolution_clock::now();
 	if (!searchWin) {
 		if (player)
-			(RootResult&)result = board.search<1, true>(*this, alpha, beta, depth);
+			(RootResult&)result = board.search<1, true>(*this, alpha, beta, depth + 1);
 		else
-			(RootResult&)result = board.search<0, true>(*this, alpha, beta, depth);
+			(RootResult&)result = board.search<0, true>(*this, alpha, beta, depth + 1);
 	} else {
 		if (player)
-			(RootResult&)result = board.search<1, true, true>(*this, alpha, beta, depth);
+			(RootResult&)result = board.search<1, true, true>(*this, alpha, beta, depth + 1);
 		else
-			(RootResult&)result = board.search<0, true, true>(*this, alpha, beta, depth);
+			(RootResult&)result = board.search<0, true, true>(*this, alpha, beta, depth + 1);
 	}
 	auto end = std::chrono::high_resolution_clock::now();
 	result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -83,7 +83,7 @@ SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& per
 				// if (parsedScore.outcome != SCORE::DRAW)
 				// 	std::cout << "depth " << depth << ": found mate in " << parsedScore.outcomeDistance << std::endl;
 				if (parsedScore.outcome != SCORE::DRAW && parsedScore.outcomeDistance <= depth + 1) {
-					persistent.lastDepth = parsedScore.outcomeDistance - 1; // limit next search depth to mate distance
+					persistent.lastDepth = parsedScore.outcomeDistance - 2; // limit next search depth to mate distance
 					// std::cout << "stop at " << persistent.lastDepth << std::endl;
 					goto stopSearchNoDepthSet;
 				}

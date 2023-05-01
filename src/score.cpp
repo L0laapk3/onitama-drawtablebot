@@ -9,10 +9,10 @@
 ScoreParsed parseScore(Score score) {
 	ScoreParsed result{};
 	result.eval = score;
-	if (score >= SCORE::WIN - DEPTH_MAX - 1) {
+	if (score >= SCORE::WIN - DEPTH_MAX) {
 		result.outcome = SCORE::WIN;
 		result.outcomeDistance = SCORE::WIN - score + 1;
-	} else if (score <= SCORE::LOSS + DEPTH_MAX + 1) {
+	} else if (score <= SCORE::LOSS + DEPTH_MAX) {
 		result.outcome = SCORE::LOSS;
 		result.outcomeDistance = score - SCORE::LOSS + 1;
 	} else

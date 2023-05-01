@@ -20,7 +20,7 @@ struct SearchPersistent {
 	Score alpha = -MUL_PIECE_ADVANTAGE / 10;
 	Score beta  =  MUL_PIECE_ADVANTAGE / 10;
 	Score lastScore = 0;
-	Depth lastDepth = 1;
+	Depth lastDepth = 0;
 };
 
 struct SearchResult : public RootResult {
