@@ -22,7 +22,7 @@ struct TranspositionMove {
 			union {
 				U8 fromBitFull;
 				struct {
-					U8 fromBit     : 6;
+					U8 fromBit : 6;
 					Bound type : 2;
 				};
 			};

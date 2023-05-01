@@ -40,11 +40,19 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 		if (game.tt.get(hash, ttReadEntry)) {
 			if constexpr (!root && !trackDistance) {
 				// TT cutoff copied from stockfish - works much better than wikipedia/chessprogramming's version
-				if (ttReadEntry->depth >= depthLeft) // || std::abs(ttReadEntry->score) >= SCORE::WIN)
+				if (ttReadEntry->depth >= depthLeft) { // || std::abs(ttReadEntry->score) >= SCORE::WIN)
 				// if (ttReadEntry->depth > depthLeft - (ttReadEntry->move.type == Bound::EXACT) || std::abs(ttReadEntry->score) >= SCORE::WIN)
-					if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? Bound::LOWER : Bound::UPPER))
-					// if (ttReadEntry->move.type == Bound::EXACT)
+					// if (ttReadEntry->move.type & (ttReadEntry->score >= beta ? Bound::LOWER : Bound::UPPER))
+					if (ttReadEntry->move.type == Bound::EXACT)
 						return ttReadEntry->score;
+					else if (ttReadEntry->move.type == Bound::UPPER) {
+						if (ttReadEntry->score <= alpha)
+							return ttReadEntry->score;
+					} else if (ttReadEntry->move.type == Bound::LOWER) {
+						if (ttReadEntry->score >= beta)
+							return ttReadEntry->score;
+					}
+				}
 			}
 			ttBestMove = ttReadEntry->move;
 			ttBestMove.fromBitFull = ttBestMove.fromBit; // clear boundType
@@ -56,39 +64,37 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 	Score alphaOrig = alpha;
 	Board nextBoard;
 	bool foundMove = false;
-	Score bestScore = SCORE::MIN;
+	Score bestRootScore = SCORE::MIN;
 	iterateMoves<player, !root && quiescence>(game, ttBestMove, [&](TranspositionMove& move) {
 		foundMove = true;
 		Board beforeBoard = *this;
 		Score score;
-		if (quiescence || depthLeft - 1 <= 0) // trackDistance: widen the search window so we can subtract one again to penalize for distance
-			score = -search<!player, false, trackDistance, true>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), 0);
+		if (quiescence || depthLeft - 1 <= 1) // trackDistance: widen the search window so we can subtract one again to penalize for distance
+			score = -search<!player, false, trackDistance, true>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), 1);
 		else
 			score = -search<!player, false, trackDistance, false>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
 
 		if (trackDistance && score != 0) // move score closer to zero for every move
 			score -= score >= 0 ? 1 : -1;
 
-		if (root && score > bestScore) {
+		if (root && score > bestRootScore) {
 			nextBoard = *this;
-			bestScore = score;
-		}
-		if (score >= beta) {
-			alpha = beta;
-			bestMove = move;
-			return false;
+			bestRootScore = score;
 		}
 
 		if (score > alpha) {
 			alpha = score;
 			bestMove = move;
+			if (alpha >= beta) {
+				return false;
+			}
 		}
 		return true;
 	});
 
 	if (!quiescence && !root && !trackDistance) {
-		bestMove.type = alpha <= alphaOrig ? Bound::UPPER : alpha >= beta ? Bound::LOWER : Bound::EXACT;
-		game.tt.put({
+		bestMove.type = alphaOrig >= alpha ? Bound::UPPER : alpha >= beta ? Bound::LOWER : Bound::EXACT;
+		game.tt.put(Transposition{
 			.depth = depthLeft,
 			.move  = bestMove,
 			.score = alpha,
