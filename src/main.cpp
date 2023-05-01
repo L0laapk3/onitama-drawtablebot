@@ -106,14 +106,14 @@ int main(int argc, char** argv) {
 	if (0)
 		testMain();
 
-	if (0) {
+	if (1) {
 		singleSearch();
 		return 0;
 	}
 
-	S64 timeMs = 100;
+	S64 timeMs = 1000;
 
-	if (1) {
+	if (0) {
 		while (true)
 			selfPlay(timeMs);
 		return 0;

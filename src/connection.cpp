@@ -49,8 +49,8 @@ Connection::Connection() {
 		printf("WSAStartup Failed.\n");
 	}
 #endif
-	// ws = std::unique_ptr<easywsclient::WebSocket>(easywsclient::WebSocket::from_url("ws://server.lucasholten.com/onitama"));
-	ws = std::unique_ptr<easywsclient::WebSocket>(easywsclient::WebSocket::from_url("ws://localhost:5000"));
+	ws = std::unique_ptr<easywsclient::WebSocket>(easywsclient::WebSocket::from_url("ws://server.lucasholten.com/onitama"));
+	// ws = std::unique_ptr<easywsclient::WebSocket>(easywsclient::WebSocket::from_url("ws://localhost:5000"));
 	assert(ws);
 	assert(ws->getReadyState() != easywsclient::WebSocket::CLOSED);
 }

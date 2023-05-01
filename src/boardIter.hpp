@@ -8,10 +8,19 @@
 
 
 
+// #define NO_INLINE
+
+#if defined(NO_INLINE)
+	#define INLINE_FN __attribute__((noinline))
+#else
+	#define INLINE_FN __attribute__((always_inline)) inline
+#endif
+
+
 // assumes p0 is to move
 // assumes the board is not a win in 1
 template<bool player, bool quiescence, typename Callable>
-inline void Board::iterateMoves(Game& game, TranspositionMove bestMove, const Callable f) {
+INLINE_FN void Board::iterateMoves(Game& game, TranspositionMove bestMove, const Callable f) {
 	Board beforeBoard = *this;
 	U8 thisCardI = cardI;
 
