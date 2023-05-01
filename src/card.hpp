@@ -236,6 +236,10 @@ struct CardsInfo {
 
 
 
+CardsInfo randomDeck();
+
+
+
 void print(const MoveBoard& moves);
 
 

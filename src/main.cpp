@@ -27,9 +27,9 @@ void singleSearch() {
 
 
 void selfPlay(S64 timeMs) {
-	Game game(
-		&CARDS_PERFT
-	);
+	auto cards = randomDeck(); // CARDS_PERFT;
+	Game game(&cards);
+	game.board.print(*game.cards);
 
 	std::vector<Board> boards{};
 	std::vector<bool> players{};
@@ -60,7 +60,7 @@ void selfPlay(S64 timeMs) {
 	}
 	boards.push_back(game.board);
 	players.push_back(game.player);
-	std::cout << Board::toString(*game.cards, boards, players);
+	// std::cout << Board::toString(*game.cards, boards, players);
 }
 
 
@@ -106,15 +106,16 @@ int main(int argc, char** argv) {
 	if (0)
 		testMain();
 
-	if (1) {
+	if (0) {
 		singleSearch();
 		return 0;
 	}
 
 	S64 timeMs = 100;
 
-	if (0) {
-		selfPlay(timeMs);
+	if (1) {
+		while (true)
+			selfPlay(timeMs);
 		return 0;
 	}
 

@@ -3,6 +3,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include <random>
 
 
 const Card& findCard(const std::string_view& name) {
@@ -29,3 +30,26 @@ void print(const MoveBoard& moves) {
 
 
 constexpr CardsInfo CARDS_PERFT = CardsInfo::create({ BOAR, OX, ELEPHANT, HORSE, CRAB });
+
+
+
+CardsInfo randomDeck() {
+    std::random_device rd;
+	std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(0, ALL_CARDS_BY_NAME.size() - 1);
+
+	std::array<int, 5> cardIndices{ -1 };
+	for (int i = 0; i < 5; i++) {
+		do {
+			cardIndices[i] = dist(gen);
+		} while (std::find(cardIndices.begin(), cardIndices.begin() + i, cardIndices[i]) != cardIndices.begin() + i);
+	}
+
+	return CardsInfo::create({
+		ALL_CARDS_BY_NAME[cardIndices[0]],
+		ALL_CARDS_BY_NAME[cardIndices[1]],
+		ALL_CARDS_BY_NAME[cardIndices[2]],
+		ALL_CARDS_BY_NAME[cardIndices[3]],
+		ALL_CARDS_BY_NAME[cardIndices[4]],
+	});
+}
