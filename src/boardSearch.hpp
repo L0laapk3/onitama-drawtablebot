@@ -40,18 +40,15 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 		if (game.tt.get(hash, ttReadEntry)) {
 			if constexpr (!root) {
 				// TT cutoff copied from stockfish - works much better than wikipedia/chessprogramming's version
-				if (ttReadEntry->depth >= depthLeft) { // || std::abs(ttReadEntry->score) >= SCORE::WIN)
+				if (ttReadEntry->depth >= depthLeft || std::abs(ttReadEntry->score) >= SCORE::WIN) {
 				// if (ttReadEntry->depth > depthLeft - (ttReadEntry->move.bound == Bound::EXACT) || std::abs(ttReadEntry->score) >= SCORE::WIN)
 					// if (ttReadEntry->move.bound & (ttReadEntry->score >= beta ? Bound::LOWER : Bound::UPPER))
-					if (ttReadEntry->move.bound == Bound::EXACT)
+					if (ttReadEntry->move.bound & Bound::UPPER && ttReadEntry->score < beta)
+						beta = ttReadEntry->score;
+					if (ttReadEntry->move.bound & Bound::LOWER && ttReadEntry->score > alpha)
+						alpha = ttReadEntry->score;
+					if (alpha >= beta)
 						return ttReadEntry->score;
-					else if (ttReadEntry->move.bound == Bound::UPPER) {
-						if (ttReadEntry->score <= alpha)
-							return ttReadEntry->score;
-					} else { //if (ttReadEntry->move.bound == Bound::LOWER) {
-						if (ttReadEntry->score >= beta)
-							return ttReadEntry->score;
-					}
 				}
 			}
 			ttBestMove = ttReadEntry->move;
@@ -93,7 +90,7 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 	});
 
 	if (!quiescence && !root) {
-		bestMove.bound = alphaOrig >= alpha ? Bound::UPPER : alpha >= beta ? Bound::LOWER : Bound::EXACT;
+		bestMove.bound = alpha <= alphaOrig ? Bound::UPPER : alpha >= beta ? Bound::LOWER : Bound::EXACT;
 		game.tt.put({
 			.depth = depthLeft,
 			.move  = bestMove,
