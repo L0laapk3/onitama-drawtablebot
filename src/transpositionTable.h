@@ -8,38 +8,10 @@
 
 
 
-enum Bound : U8 {
-	NONE = 0,
-	LOWER = 1,
-	UPPER = 2,
-	EXACT = LOWER | UPPER,
-};
-
-struct TranspositionMove {
-	union {
-		U16 full;
-		struct {
-			union {
-				U8 fromBitFull;
-				struct {
-					U8 fromBit  : 6;
-					Bound bound : 2;
-				};
-			};
-			union {
-				U8 toBitFull;
-				struct {
-					U8 toBit      : 6;
-					U8 secondCard : 1;
-				};
-			};
-		};
-	};
-};
 
 struct Transposition {
 	Depth depth;
-	TranspositionMove move;
+	Move move;
 	Score score;
 	U64 hash;
 };

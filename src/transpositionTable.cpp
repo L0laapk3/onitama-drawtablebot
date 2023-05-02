@@ -21,7 +21,7 @@ void TranspositionTableWrapper::markRecalculateScore(bool newSearchWin) {
 	while (it++ != &table.back().replaceAlways) {
 		if (it->hash) {
 			if (std::abs(it->score) >= SCORE::WIN - DEPTH_MAX && it->move.bound != Bound::NONE) { // affect all boards that have win states
-				it->move.bound = newSearchWin ? Bound::EXACT : it->score > 0 ? Bound::LOWER : Bound::UPPER;
+				it->move.bound = newSearchWin ? Bound::EXACT : it->score > 0 ? Bound::LOWER : Bound::UPPER; // TODO: exact when going back from search win mode, not like this
 				it->score = (it->score > 0 ? 1 : -1) * (SCORE::WIN - (newSearchWin ? DEPTH_MAX : 0));
 				it->depth = 0; // mark for recalculation
 			}

@@ -13,7 +13,40 @@
 
 
 
-struct TranspositionMove;
+
+enum Bound : U8 {
+	NONE = 0,
+	LOWER = 1,
+	UPPER = 2,
+	EXACT = LOWER | UPPER,
+};
+
+struct Move {
+	union {
+		U16 full;
+		struct {
+			union {
+				U8 fromBitFull;
+				struct {
+					U8 fromBit  : 6;
+					Bound bound : 2;
+				};
+			};
+			union {
+				U8 toBitFull;
+				struct {
+					U8 toBit      : 6;
+					U8 secondCard : 1;
+				};
+			};
+		};
+	};
+};
+
+typedef std::array<Move, 2> KillerMoves;
+
+
+
 class Game;
 struct RootResult;
 struct SearchTimeResult;
@@ -72,11 +105,11 @@ public:
 
 	// boardIter.hpp
 	template<bool player, bool quiescence, typename Callable>
-	void iterateMoves(Game& game, TranspositionMove bestMove, const Callable f);
+	void iterateMoves(Game& game, Move bestMove, const KillerMoves& killerMoves, const Callable f);
 
 	// boardSearch.hpp
 	template<bool player, bool root = false, bool trackDistance = false, bool quiescence = false>
-	std::conditional_t<root, RootResult, Score> search(Game& game, Score alpha, Score beta, Depth depthLeft);
+	std::conditional_t<root, RootResult, Score> search(Game& game, std::vector<KillerMoves>::reverse_iterator& killerMoves, Score alpha, Score beta, Depth depthLeft);
 };
 
 struct RootResult {

@@ -63,7 +63,7 @@ public:
 
 	// gameSearch.cpp
 private:
-	SearchResult search(Depth depth, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
+	SearchResult search(Depth depth, std::vector<KillerMoves>::reverse_iterator& killerMoves, bool searchWin = false, Score alpha = SCORE::LOSS, Score beta = SCORE::WIN, bool print = true);
 public:
 	SearchTimeResult searchTime(SearchStopCriteria stop, SearchPersistent& persistent);
 	SearchTimeResult searchTime(SearchStopCriteria stop);

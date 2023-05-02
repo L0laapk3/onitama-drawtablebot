@@ -16,9 +16,6 @@ void singleSearch() {
 		Board::create(0, { 0b00000'00000'00000'01110'00000, 0b00000'01110'00000'00000'00000 }, { 0b00000'00000'00000'00100'00000, 0b00000'00100'00000'00000'00000 })
 	);
 
-	// before aspiration windows: 6700ms
-	// after aspiration windows: 4000ms
-
 	game.board.print(*game.cards, 0);
 	SearchResult result = game.searchTime({ .depth = 17 });
 	result.board.print(*game.cards, 1);

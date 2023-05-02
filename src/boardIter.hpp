@@ -20,7 +20,7 @@
 // assumes p0 is to move
 // assumes the board is not a win in 1
 template<bool player, bool quiescence, typename Callable>
-INLINE_FN void Board::iterateMoves(Game& game, TranspositionMove bestMove, const Callable f) {
+INLINE_FN void Board::iterateMoves(Game& game, Move bestMove, const KillerMoves& killerMoves, const Callable f) {
 	Board beforeBoard = *this;
 	U8 thisCardI = cardI;
 
@@ -29,44 +29,53 @@ INLINE_FN void Board::iterateMoves(Game& game, TranspositionMove bestMove, const
 	Board beforeBoardFlipped = *this;
 	const auto& moveList = game.cards->moveBoards[CARDS_HAND[player][cardI]];
 
+
+	auto doSingleMove = [&](bool checkValid, Move& move, U32& pBest, const Callable f) {
+		U32 pFrom = 1U << move.fromBitFull;
+		U32 pTo = 1U << move.toBit;
+		U32 pMove = pFrom | pTo;
+
+		// if (!(pFrom & p[player]) || !(pTo & moveList[move.fromBitFull].flip[player].cards[move.secondCard])) // TODO: maybe do something with this
+		// 	std::cout << "shit ass bitch ass collision" << std::endl;
+
+		p[player] ^= pMove;
+		pBest = p[player];
+		U32 kMove = pFrom & k[player] ? pMove : 0;
+		k[player] ^= kMove;
+		U32 pRemoved = p[!player] & pTo;
+		p[!player] ^= pRemoved;
+
+		if (kMove)
+			hash ^= ZOBRIST.kings[player][move.fromBitFull] ^ ZOBRIST.kings[pRemoved ? 2 + player : player][move.toBit];
+		else
+			hash ^= ZOBRIST.pawns[player][move.fromBitFull] ^ ZOBRIST.pawns[pRemoved ? 2 : player][move.toBit];
+
+		hash ^= ZOBRIST.moves[cardI][player][move.secondCard];
+		cardI = CARDS_SWAP[cardI][player][move.secondCard];
+
+		assertValid(*game.cards, !player);
+		Board beforeBoard2 = *this;
+		bool cont = f(move);
+		assume(*this == beforeBoard2);
+
+		cardI = thisCardI;
+
+		p[player] ^= pMove;
+		k[player] ^= kMove;
+
+		p[!player] |= pRemoved;
+
+		return cont;
+	};
+
+
+
 	U32 pBest = 0;
 	if (!quiescence) {
-		U32 pFrom = 1U << bestMove.fromBitFull;
-		U32 pTo = 1U << bestMove.toBit;
-		U32 pMove = pFrom | pTo;
 		if (bestMove.full) {
-			// if (!(pFrom & p[player]) || !(pTo & moveList[bestMove.fromBitFull].flip[player].cards[bestMove.secondCard])) // TODO: maybe do something with this
-			// 	std::cout << "shit ass bitch ass collision" << std::endl;
-
-
-			p[player] ^= pMove;
-			pBest = p[player];
-			U32 kMove = pFrom & k[player] ? pMove : 0;
-			k[player] ^= kMove;
-			U32 pRemoved = p[!player] & pTo;
-			p[!player] ^= pRemoved;
 
 			U64 beforeHash = hash;
-			if (kMove)
-				hash ^= ZOBRIST.kings[player][bestMove.fromBitFull] ^ ZOBRIST.kings[pRemoved ? 2 + player : player][bestMove.toBit];
-			else
-				hash ^= ZOBRIST.pawns[player][bestMove.fromBitFull] ^ ZOBRIST.pawns[pRemoved ? 2 : player][bestMove.toBit];
-
-			hash ^= ZOBRIST.moves[cardI][player][bestMove.secondCard];
-			cardI = CARDS_SWAP[cardI][player][bestMove.secondCard];
-
-			assertValid(*game.cards, !player);
-			Board beforeBoard2 = *this;
-			bool cont = f(bestMove);
-			assume(*this == beforeBoard2);
-
-			cardI = thisCardI;
-
-			p[player] ^= pMove;
-			k[player] ^= kMove;
-
-			p[!player] |= pRemoved;
-
+			bool cont = doSingleMove(false, bestMove, pBest, f);
 			hash = beforeHash;
 
 			assume(*this == beforeBoardFlipped);
@@ -82,7 +91,7 @@ INLINE_FN void Board::iterateMoves(Game& game, TranspositionMove bestMove, const
 		for (int quiet = 0; quiet < 2; quiet++) {
 			U32 sourceBits = p[player];
 			do {
-				TranspositionMove ttMove;
+				Move ttMove;
 
 				U32 sourcePiece = sourceBits & -sourceBits;
 				sourceBits &= sourceBits - 1;
@@ -159,6 +168,11 @@ INLINE_FN void Board::iterateMoves(Game& game, TranspositionMove bestMove, const
 			} while (sourceBits && cont);
 			if (!cont || quiescence)
 				break;
+
+
+			for (const auto& move : killerMoves) {
+
+			}
 		}
 
 		cardI = thisCardI;

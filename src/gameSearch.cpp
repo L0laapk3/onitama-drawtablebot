@@ -19,20 +19,20 @@ void narrowSearchForWin(ScoreParsed& score, Score& alpha, Score& beta) {
 }
 
 
-SearchResult Game::search(Depth depth, bool searchWin, Score alpha, Score beta, bool print) {
+SearchResult Game::search(Depth depth, std::vector<KillerMoves>::reverse_iterator& killerMoves, bool searchWin, Score alpha, Score beta, bool print) {
 	board.assertValid(*cards, player);
 	SearchResult result;
 	auto start = std::chrono::high_resolution_clock::now();
 	if (!searchWin) {
 		if (player)
-			(RootResult&)result = board.search<1, true>(*this, alpha, beta, depth + 1);
+			(RootResult&)result = board.search<1, true>(*this, killerMoves, alpha, beta, depth + 1);
 		else
-			(RootResult&)result = board.search<0, true>(*this, alpha, beta, depth + 1);
+			(RootResult&)result = board.search<0, true>(*this, killerMoves, alpha, beta, depth + 1);
 	} else {
 		if (player)
-			(RootResult&)result = board.search<1, true, true>(*this, alpha, beta, depth + 1);
+			(RootResult&)result = board.search<1, true, true>(*this, killerMoves, alpha, beta, depth + 1);
 		else
-			(RootResult&)result = board.search<0, true, true>(*this, alpha, beta, depth + 1);
+			(RootResult&)result = board.search<0, true, true>(*this, killerMoves, alpha, beta, depth + 1);
 	}
 	auto end = std::chrono::high_resolution_clock::now();
 	result.durationUs = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
@@ -62,6 +62,8 @@ SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& per
 	}
 	// printf("alpha: %s, beta: %s\n", scoreToString(alpha).c_str(), scoreToString(beta).c_str());
 
+	std::vector<KillerMoves> killerMoves{};
+
 	S64 lastDurationUs = 1, lastDurationUs2 = 1;
 	bool widenedAspirationWindow = false;
 	Depth depth = 1; //persistent.lastDepth;
@@ -69,10 +71,12 @@ SearchTimeResult Game::searchTime(SearchStopCriteria stop, SearchPersistent& per
 	stop.time *= 1000;
 	while (depth < stop.depth) {
 		depth++;
+		killerMoves.resize(depth);
 		while (true) {
 			while (true) {
 				// printf("window: [%s, %s], win: %d\n", scoreToString(persistent.alpha).c_str(), scoreToString(persistent.beta).c_str(), persistent.searchWin);
-				(SearchResult&)result = search(depth, persistent.searchWin, persistent.alpha, persistent.beta, false);
+				auto killerMovesIt = killerMoves.rbegin();
+				(SearchResult&)result = search(depth, killerMovesIt, persistent.searchWin, persistent.alpha, persistent.beta, false);
 				usedTime += result.durationUs;
 				parsedScore = parseScore(result.score);
 				if ((parsedScore.outcome != SCORE::DRAW) && !persistent.searchWin) {

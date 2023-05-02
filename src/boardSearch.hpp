@@ -10,7 +10,7 @@
 // negamax implementation
 // p0 is the maximizer
 template<bool player, bool root, bool trackDistance, bool quiescence>
-std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alpha, Score beta, Depth depthLeft) {
+std::conditional_t<root, RootResult, Score> Board::search(Game& game, std::vector<KillerMoves>::reverse_iterator& killerMoves, Score alpha, Score beta, Depth depthLeft) {
 	Board beforeBoard = *this;
 	Score alphaOrig = alpha;
 
@@ -35,7 +35,7 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 			alpha = standing_pat;
 	}
 
-	TranspositionMove ttBestMove{};
+	Move ttBestMove{};
 	if constexpr (!quiescence) {
 		const Transposition* ttReadEntry;
 		if (game.tt.get(hash, ttReadEntry)) {
@@ -60,18 +60,18 @@ std::conditional_t<root, RootResult, Score> Board::search(Game& game, Score alph
 	}
 
 	// TODO: TT bestmove logic
-	TranspositionMove bestMove{};
+	Move bestMove{};
 	Board nextBoard;
 	bool foundMove = false;
 	Score bestRootScore = SCORE::MIN;
-	iterateMoves<player, !root && quiescence>(game, ttBestMove, [&](TranspositionMove& move) {
+	iterateMoves<player, !root && quiescence>(game, ttBestMove, *killerMoves, [&](Move& move) {
 		foundMove = true;
 		Board beforeBoard = *this;
 		Score score;
 		if (quiescence || depthLeft - 1 <= 1) // trackDistance: widen the search window so we can subtract one again to penalize for distance
-			score = -search<!player, false, trackDistance, true>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), 1);
+			score = -search<!player, false, trackDistance, true >(game, killerMoves, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), 1);
 		else
-			score = -search<!player, false, trackDistance, false>(game, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
+			score = -search<!player, false, trackDistance, false>(game, killerMoves, -(beta + (beta >= 0 ? trackDistance : -trackDistance)), -(alpha + (alpha >= 0 ? trackDistance : -trackDistance)), depthLeft - 1);
 
 		if (trackDistance && score != 0) // move score closer to zero for every move
 			score -= score >= 0 ? 1 : -1;
